@@ -27,7 +27,7 @@ fn main() {
                 // sum_strings.push("\nstep".to_string());
                 sum_strings.push(input_line.clone());
                 
-                if sum_strings.len() == 30{
+                if input_line.starts_with("P"){
                     if let Err(err) = append_to_file("output.txt", &sum_strings.join("\n")) {
                         eprintln!("Error writing to file: {}", err);
                         // Handle the error appropriately
