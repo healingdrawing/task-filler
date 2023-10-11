@@ -30,7 +30,7 @@ fn main() {
                     if let Err(err) = append_to_file(DEBUG_FILE, &sum_strings.join("\n")) {// Handle the error appropriately
                         eprintln!("Error writing to file: {}", err); break;
                     }
-                    println!("1 1\n");
+                    println!("2 1\n");
                 }
 
                 // Pause for 0.1 seconds
