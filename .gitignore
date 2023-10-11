@@ -16,4 +16,3 @@ Cargo.lock
 .DS_Store
 
 _temp/docker_image/output.txt
-_temp/docker_image/solution/filler
