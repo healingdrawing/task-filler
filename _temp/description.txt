@@ -1,0 +1,10 @@
+s
+a
+
+a - piece placed from top coordinate
+s - piece placed from top coordinate
+
+a
+s
+
+a - piece placed from top coordinate
