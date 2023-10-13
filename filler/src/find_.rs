@@ -1,4 +1,4 @@
-use crate::parse_::{Parser, ParserState};
+use crate::parse_::Parser;
 
 #[derive(Debug)]
 pub struct Finder {
