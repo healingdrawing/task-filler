@@ -6,7 +6,7 @@ mod parse_piece;
 mod find_;
 
 use debug::{append_to_file, recreate_file, DEBUG_FILE};
-use std::io::{self, Write};
+use std::io::{self};
 
 use crate::parse_::ParserState;
 
@@ -44,7 +44,7 @@ fn main() {
         eprintln!("Error reading input: {}", error);
         break;
       }
-      
+
     }
   }
   
