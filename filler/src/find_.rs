@@ -2,18 +2,31 @@ use crate::parse_::Parser;
 
 #[derive(Debug)]
 pub struct Finder {
-  pub xy: [usize; 2],
+  /**for move answer*/
+  pub answer_xy: [usize; 2],
+  /**for surrender answer*/
+  pub enemy_xy: [usize; 2],
+  /** the play ground field , filled by players chars, updated by game engine for each step */
+  pub field: Vec<Vec<char>>,
+  /** the piece to place on the field, updated by game engine for each step */
+  pub piece: Vec<Vec<char>>,
+  /**all correct variants of coordinate to place the piece, looks like using left upper corner, but not sure*/
+  pub variants: Vec<[usize; 2]>,
 }
 
 impl Finder {
   pub fn new() -> Finder {
     Finder {
-      xy: [0, 0],
+      answer_xy: [0, 0],
+      enemy_xy: [0, 0],
+      field: Vec::new(),
+      piece: Vec::new(),
+      variants: Vec::new(),
     }
   }
 
   /** get the answer(coordinates) as String */
-  pub fn answer(&self) -> String {format!("{} {}", self.xy[0], self.xy[1])}
+  pub fn answer(&self) -> String {format!("{} {}", self.answer_xy[0], self.answer_xy[1])}
   
   pub fn find_answer(&mut self, parser: &mut Parser) {
     let anfield = &parser.anfield;
@@ -24,8 +37,7 @@ impl Finder {
     //first clean the raw data of the field, find solution and write it to self.answer
     
     // clean the data
-
-    // build the 2d array , to represent the field
+    // build the 2d array field (row,column)yx = Vec<Vec<char>> , to represent the field
 
     /*
     [only the first step]
@@ -58,7 +70,7 @@ impl Finder {
     // otherwise return the surrender answer (the most far enemy position)
 
 
-    self.xy = [2, 2]; //todo: remove this line, it is only for test
+    self.answer_xy = [2, 2]; //todo: remove this line, it is only for test
     
     //clean parser
     parser.reset();
