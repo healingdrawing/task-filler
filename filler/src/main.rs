@@ -33,35 +33,19 @@ fn main() {
         match parser.state {
           ParserState::GOT_PIECE => {
             finder.find_answer(&mut parser);
-            println!("{}", finder.answer);
-            // println!("3 3\n");
+            println!("{}", finder.answer());
           },
           _ => (),
         }
         
-        // // sum_strings.push("\nstep".to_string());
-        // sum_strings.push(input_line.clone());
-        
-        // if input_line.starts_with("P") {
-        //   if let Err(err) = append_to_file(DEBUG_FILE, &sum_strings.join("\n")) {
-        //     // Handle the error appropriately
-        //     eprintln!("Error writing to file: {}", err);
-        //     break;
-        //   }
-        //   println!("2 1\n");
-        // }
-        
-        // Pause for 0.1 seconds
-        // thread::sleep(Duration::from_millis(100));
       }
       Err(error) => {
         // Handle the error appropriately
         eprintln!("Error reading input: {}", error);
         break;
       }
+      
     }
   }
   
-  // Print the collected values
-  // println!("Sum of Strings:\n{}", sum_strings.join("\n"));
 }

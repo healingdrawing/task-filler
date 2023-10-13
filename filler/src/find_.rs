@@ -3,16 +3,17 @@ use crate::parse_::{Parser, ParserState};
 #[derive(Debug)]
 pub struct Finder {
   pub xy: [usize; 2],
-  pub answer: String,
 }
 
 impl Finder {
   pub fn new() -> Finder {
     Finder {
       xy: [0, 0],
-      answer: String::new(),
     }
   }
+
+  /** get the answer(coordinates) as String */
+  pub fn answer(&self) -> String {format!("{} {}", self.xy[0], self.xy[1])}
   
   pub fn find_answer(&mut self, parser: &mut Parser) {
     let anfield = &parser.anfield;
@@ -29,7 +30,7 @@ impl Finder {
     /*
     [only the first step]
     find the player position
-    find the enemy position
+    find the enemy position(the most far enemy cell) and save coordinates as surrender answer
     find the enemy direction N(-y) S(+y) W(-x) E(+x), x8 directions using enum,
     that is the new piece major direction and save it into finder.
     Later it can be used as way
@@ -54,8 +55,10 @@ impl Finder {
     // and place the piece on the field with the most agressively placed player cell, as possible deep
     // in the major direction, to try cover more enemy cells in the major direction
 
+    // otherwise return the surrender answer (the most far enemy position)
 
-    self.answer = String::from("2 2"); // todo: remove this gap
+
+    self.xy = [2, 2]; //todo: remove this line, it is only for test
     
     //clean parser
     parser.reset();
