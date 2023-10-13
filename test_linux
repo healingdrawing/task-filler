@@ -1,6 +1,0 @@
-#!/bin/bash
-# rm _temp/docker_image/output.txt
-
-./do
-
-./linux

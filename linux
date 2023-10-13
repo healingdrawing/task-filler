@@ -1,5 +1,0 @@
-#!/bin/bash
-
-cd _temp/docker_image/
-
-./linux_game_engine -f maps/map03 -p1 linux_robots/bender -p2 solution/filler
