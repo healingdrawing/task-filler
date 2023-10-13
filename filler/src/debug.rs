@@ -13,7 +13,7 @@ pub fn recreate_file(file_path: &str) -> io::Result<()> {
 
 // Function to append data to a file
 pub fn append_to_file(file_path: &str, data: &str) -> io::Result<()> {
-  if !DEBUG {
+  if DEBUG {
     let file = OpenOptions::new()
     .create(true)
     .append(true)
