@@ -48,10 +48,11 @@ impl Finder {
     // check if there is variant to place the piece on the field that some cell of that piece
     // will be placed not the less agressively than the enemy cell, so the same or more agressively
     // from the enemy position. if there is such variant - place the piece there(set the self.answer)
+    // to try prevent or restrict the enemy cell to move in the major direction
 
     // otherwise iterate the correct variants again
     // and place the piece on the field with the most agressively placed player cell, as possible deep
-    // in the major direction
+    // in the major direction, to try cover more enemy cells in the major direction
 
 
     self.answer = String::from("2 2"); // todo: remove this gap
