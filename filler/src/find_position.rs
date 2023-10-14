@@ -44,7 +44,7 @@ impl Finder {
 
     for y in 0..anfield.len() - piece_height + 1 {
       for x in 0..anfield[0].len() - piece_width + 1 {
-        if self.position_is_correct(anfield, piece, x, y){
+        if self.position_is_correct(anfield, piece, x, y, player){
           //todo: implement.
           /*
             check the most agressively placed enemy cell, opposite the major direction
@@ -58,15 +58,48 @@ impl Finder {
     answer_xy
   }
 
-  fn position_is_correct(&self, anfield: &VecDeque<VecDeque<char>>, piece: &VecDeque<VecDeque<char>>, x: usize, y: usize) -> bool {
-    //todo: implement.
-    /* 
-      position is correct if all(except one) non-empty cells of the piece
-      are placed on the empty cells of the field, and only one non-empty cell
-      of the piece is placed on the player cell(any cell covered by the
-      player char by the player peice placement previously)
+  /** 
+    the piece position is correct if all(except one) non-empty cells of the piece
+    are placed on the empty cells of the field, and only one non-empty cell
+    of the piece is placed on the player cell(any cell covered by the
+    player char by the player piece placement previously)
+  */
+  fn position_is_correct(&self, anfield: &VecDeque<VecDeque<char>>, piece: &VecDeque<VecDeque<char>>, x: usize, y: usize, player:&[char;2]) -> bool {
+
+    /*
+      only one cell from the piece must be placed on the player cell, so
+      when the player_cells_hovered_by_piece is 1, for all the piece cells,
+      the position is correct, otherwise it is not
     */
-    false
+    let mut player_cells_hovered_by_piece:usize = 0;
+
+    /*iterate the piece and compare the cells with the field cells using the x and y incrementation*/
+    for (piece_y, field_y) in (y..y + piece.len()).zip(0..piece.len()) { /*vertical row step */
+      for (piece_x, field_x) in (x..x + piece[0].len()).zip(0..piece[0].len()) {/*column */
+        if piece[piece_y][piece_x] != '.' {/*if the piece cell is not empty*/
+          if anfield[field_y][field_x] != '.' {/*if the field cell is not empty*/
+            /* both cells (anfield, piece) are not empty, so need extra check*/
+
+            if player_cells_hovered_by_piece > 0{/*if at least one player cell is already hovered by piece*/
+              return false;/*the piece position is not correct*/
+            }
+
+            if anfield[field_y][field_x] == player[0] || anfield[field_y][field_x] == player[1] {/*if the field cell is player cell*/
+              player_cells_hovered_by_piece += 1;/*increment the player cells hovered by piece*/
+            } else {/*if the field cell is enemy cell*/
+              return false;/*the piece position is not correct*/
+            }
+
+          }
+        }
+      }
+    }
+
+    if player_cells_hovered_by_piece == 0 {/*if(finally) no player cell is hovered by piece*/
+      return false;/*the piece position is not correct*/
+    }
+
+    true /*the piece position is correct*/
   }
 
 }
