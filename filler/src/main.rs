@@ -4,6 +4,9 @@ mod parse_player;
 mod parse_anfield;
 mod parse_piece;
 mod find_;
+mod find_player;
+mod find_enemy;
+mod find_distance;
 
 use debug::{append_to_file, recreate_file, DEBUG_FILE};
 use std::io::{self};

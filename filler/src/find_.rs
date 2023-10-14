@@ -1,7 +1,25 @@
 use crate::parse_::Parser;
 
+/** direction of the vector aimed to enemy */
+#[derive(Debug)]
+pub enum Compas {
+  N, // -y 
+  NE, // +x -y
+  E, // +x
+  SE, // +x +y
+  S, // +y
+  SW, // -x +y
+  W, // -x
+  NW, // -x -y
+  CENTRAL, // no direction
+}
+
 #[derive(Debug)]
 pub struct Finder {
+  /**first step used to determine major direction*/
+  pub fresh: bool,
+  /**major direction */
+  pub major: Compas,
   /**for move answer*/
   pub answer_xy: [usize; 2],
   /**for surrender answer*/
@@ -14,6 +32,8 @@ pub struct Finder {
 impl Finder {
   pub fn new() -> Finder {
     Finder {
+      fresh: true,
+      major: Compas::CENTRAL,
       answer_xy: [0, 0],
       enemy_xy: [0, 0],
     }
@@ -33,6 +53,18 @@ impl Finder {
     // clean the data
     // build the 2d array field (row,column)yx = Vec<Vec<char>> , to represent the field
 
+    if self.fresh{
+      self.fresh = false;
+      // find the player position
+      let player_xy = self.find_player(parser);
+      // if player not found then surrender
+      if player_xy == [usize::MAX, usize::MAX] { self.answer_xy = player_xy; return; }
+      // find the enemy position(the most far enemy cell) and save coordinates as surrender answer
+      let enemy = self.find_enemy(parser, player_xy);
+      self.enemy_xy = enemy;
+      // todo: find the enemy direction N(-y) S(+y) W(-x) E(+x), x8 directions using enum,
+      
+    }
 
     /*
     [only the first step]
