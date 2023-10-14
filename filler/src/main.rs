@@ -7,6 +7,8 @@ mod find_;
 mod find_player;
 mod find_enemy;
 mod find_distance;
+mod find_direction;
+mod find_position;
 
 use debug::{append_to_file, recreate_file, DEBUG_FILE};
 use std::io::{self};

@@ -18,15 +18,14 @@ pub enum Compas {
 pub struct Finder {
   /**first step used to determine major direction*/
   pub fresh: bool,
-  /**major direction */
+  /**major direction to enemy in the beginning*/
   pub major: Compas,
   /**for move answer*/
   pub answer_xy: [usize; 2],
   /**for surrender answer*/
   pub enemy_xy: [usize; 2],
-  // pub piece: Vec<Vec<char>>,
-  // pub field: Vec<Vec<char>>,
-  // pub variants: Vec<[usize; 2]>,
+  /**for potential implementation of more compact placement(not agressive) */
+  pub player_xy: [usize; 2],
 }
 
 impl Finder {
@@ -34,8 +33,9 @@ impl Finder {
     Finder {
       fresh: true,
       major: Compas::CENTRAL,
-      answer_xy: [0, 0],
-      enemy_xy: [0, 0],
+      answer_xy: [usize::MAX, usize::MAX],
+      enemy_xy: [usize::MAX, usize::MAX],
+      player_xy: [usize::MAX, usize::MAX],
     }
   }
 
@@ -57,13 +57,14 @@ impl Finder {
       self.fresh = false;
       // find the player position
       let player_xy = self.find_player(parser);
+      self.player_xy = player_xy;
       // if player not found then surrender
       if player_xy == [usize::MAX, usize::MAX] { self.answer_xy = player_xy; return; }
       // find the enemy position(the most far enemy cell) and save coordinates as surrender answer
-      let enemy = self.find_enemy(parser, player_xy);
-      self.enemy_xy = enemy;
+      let enemy_xy = self.find_enemy(parser, player_xy);
+      self.enemy_xy = enemy_xy;
       // todo: find the enemy direction N(-y) S(+y) W(-x) E(+x), x8 directions using enum,
-      
+      self.major = self.find_direction(player_xy, enemy_xy);
     }
 
     /*
@@ -73,29 +74,10 @@ impl Finder {
     find the enemy direction N(-y) S(+y) W(-x) E(+x), x8 directions using enum,
     that is the new piece major direction and save it into finder.
     Later it can be used as way
-    to find the enemy cells which are directed to the player size
+    to find the enemy cells which are directed to the player side
     and moved already as possible deep in player direction,
     to cut their way first if it is possible.
      */
-
-    // find the most agressively placed enemy cell, opposite the major direction
-
-    // find the most agressively placed player cell, on the major direction
-
-    // find all possible variants to place the piece on the field correctly
-
-    // iterate the correct variants
-    // check if there is variant to place the piece on the field that some cell of that piece
-    // will be placed not the less agressively than the enemy cell, so the same or more agressively
-    // from the enemy position. if there is such variant - place the piece there(set the self.answer)
-    // to try prevent or restrict the enemy cell to move in the major direction
-
-    // otherwise iterate the correct variants again
-    // and place the piece on the field with the most agressively placed player cell, as possible deep
-    // in the major direction, to try cover more enemy cells in the major direction
-
-    // otherwise return the surrender answer (the most far enemy position)
-
 
     self.answer_xy = [2, 2]; //todo: remove this line, it is only for test
     
