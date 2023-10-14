@@ -1,3 +1,5 @@
+use std::collections::VecDeque;
+
 use crate::{find_::{Finder, Compas}, parse_::Parser};
 
 impl Finder {
@@ -30,7 +32,41 @@ impl Finder {
     let piece = &parser.piece;
     let player = &parser.player_char;
 
-    [0,0] //todo: remove this gap
+    /** the piece position */
+    let mut answer_xy = [usize::MAX, usize::MAX];
+    /** the most argessive enemy cell position */
+    let mut enemy_xy = [usize::MAX, usize::MAX];
+    /** the most argessive player cell position */
+    let mut player_xy = [usize::MAX, usize::MAX];
+
+    let piece_height = piece.len();
+    let piece_width = piece[0].len();
+
+    for y in 0..anfield.len() - piece_height + 1 {
+      for x in 0..anfield[0].len() - piece_width + 1 {
+        if self.position_is_correct(anfield, piece, x, y){
+          //todo: implement.
+          /*
+            check the most agressively placed enemy cell, opposite the major direction
+            check the most agressively placed player cell, on the major direction
+            update the answer_xy, if the coordinates satisfy at least one of the conditions above(complete the requirements)
+          */
+        }
+      }
+    }
+
+    answer_xy
+  }
+
+  fn position_is_correct(&self, anfield: &VecDeque<VecDeque<char>>, piece: &VecDeque<VecDeque<char>>, x: usize, y: usize) -> bool {
+    //todo: implement.
+    /* 
+      position is correct if all(except one) non-empty cells of the piece
+      are placed on the empty cells of the field, and only one non-empty cell
+      of the piece is placed on the player cell(any cell covered by the
+      player char by the player peice placement previously)
+    */
+    false
   }
 
 }
