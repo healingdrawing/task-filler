@@ -39,6 +39,11 @@ impl Finder {
     /** the most argessive player cell position */
     let mut player_xy = [usize::MAX, usize::MAX];
 
+    //todo: implement.
+    /** calculate the most argessive enemy cell position */
+    /** calculate the most argessive player cell position */
+
+
     let piece_height = piece.len();
     let piece_width = piece[0].len();
 
