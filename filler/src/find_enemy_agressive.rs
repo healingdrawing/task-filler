@@ -4,7 +4,7 @@ impl Finder {
   pub fn find_enemy_agressive(&mut self, parser: &mut Parser)-> [usize;2] {
     let enemy_char = &parser.enemy_char;
     let anfield = &parser.anfield;
-    let mut  enemy_xy = [anfield[0].len()-1, anfield.len()-1];/* 0 because of -y is the direction for the enemy in case of N, so +y is the most agressive position for the enemy progress. 0 because of -x is the direction for the enemy in case of W, so +x is the most agressive position for the enemy progress.*/
+    let mut  enemy_xy = [anfield[0].len()-1, anfield.len()-1];
     
     match self.major {
       Compas::N => {
