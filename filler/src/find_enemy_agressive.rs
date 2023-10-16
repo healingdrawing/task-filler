@@ -1,4 +1,4 @@
-use crate::{parse_::Parser, find_::{Finder, Compas}, debug::{append_to_file, DEBUG, DEBUG_FILE}};
+use crate::{parse_::Parser, find_::{Finder, Compas}, debug::{append_to_file, DEBUG_FILE}};
 
 impl Finder {
   pub fn find_enemy_agressive(&mut self, parser: &mut Parser)-> [usize;2] {
