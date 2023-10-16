@@ -50,7 +50,7 @@ impl Parser {
 
   pub fn reset(&mut self){
     self.state = ParserState::GOT_PLAYER; //skip waiting, it is fired only once
-    self.player_char = ['\0', '\0'];
+    // self.player_char = ['\0', '\0'];
     self.anfield_size = [0, 0];
     self.anfield = VecDeque::new();
     self.piece_size = [0, 0];

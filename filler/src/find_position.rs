@@ -1,6 +1,6 @@
 use std::collections::VecDeque;
 
-use crate::{find_::{Finder, Compas}, parse_::Parser, debug::{DEBUG_FILE, append_to_file}};
+use crate::{find_::Finder, parse_::Parser, debug::{DEBUG_FILE, append_to_file}};
 
 impl Finder {
   /** todo: find the optimal position for the piece
@@ -60,8 +60,7 @@ impl Finder {
           check the most agressively placed player cell, on the major direction
           update the answer_xy, if the coordinates satisfy at least one of the conditions above(complete the requirements)
           */
-          append_to_file(DEBUG_FILE, &"inside position is correct".to_string()).expect("cannot write to debug file");
-          //fix: never fired
+          append_to_file(DEBUG_FILE, &"inside position is correct TRUE".to_string()).expect("cannot write to debug file");
 
           if fresh_agressive_calculation {/*use the first found correct position for the piece as default */
             fresh_agressive_calculation = false;
@@ -80,7 +79,7 @@ impl Finder {
         }
       }
     }
-    append_to_file(&format!("answer_xy: {} {}", answer_xy[0], answer_xy[1]), DEBUG_FILE);
+    append_to_file(DEBUG_FILE, &format!("\n====\nanswer_xy: {} {}", answer_xy[0], answer_xy[1])).expect("cannot write to debug file");
     answer_xy
   }
   
@@ -92,6 +91,11 @@ impl Finder {
     */
     fn position_is_correct(&self, anfield: &VecDeque<VecDeque<char>>, piece: &VecDeque<VecDeque<char>>, x: usize, y: usize, player:&[char;2]) -> bool {
       
+      append_to_file(DEBUG_FILE, &format!("inside ===\nanfield {:?}" ,anfield)).expect("cannot write to debug file");
+      append_to_file(DEBUG_FILE, &format!("piece {:?}" ,piece)).expect("cannot write to debug file");
+      append_to_file(DEBUG_FILE, &format!("x {} y {}" ,x,y)).expect("cannot write to debug file");
+      append_to_file(DEBUG_FILE, &format!("player {:?}" ,player)).expect("cannot write to debug file");
+      
       /*
       only one cell from the piece must be placed on the player cell, so
       when the player_cells_hovered_by_piece is 1, for all the piece cells,
@@ -100,8 +104,8 @@ impl Finder {
       let mut player_cells_hovered_by_piece:usize = 0;
       
       /*iterate the piece and compare the cells with the field cells using the x and y incrementation*/
-      for (piece_y, field_y) in (y..y + piece.len()).zip(0..piece.len()) { /*vertical row step */
-        for (piece_x, field_x) in (x..x + piece[0].len()).zip(0..piece[0].len()) {/*column */
+      for (piece_y, field_y) in (0..piece.len()).zip(y..y + piece.len()) { /*vertical row step */
+        for (piece_x, field_x) in (0..piece[0].len()).zip(x..x+piece[0].len()) {/*column */
           if piece[piece_y][piece_x] != '.' {/*if the piece cell is not empty*/
             if anfield[field_y][field_x] != '.' {/*if the field cell is not empty*/
               /* both cells (anfield, piece) are not empty, so need extra check*/
