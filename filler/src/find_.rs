@@ -1,7 +1,7 @@
 use crate::parse_::Parser;
 
 /** direction of the vector aimed to enemy */
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub enum Compas {
   N, // -y 
   NE, // +x -y
@@ -20,6 +20,8 @@ pub struct Finder {
   pub fresh: bool,
   /**major direction to enemy in the beginning*/
   pub major: Compas,
+  /**minor direction, opposite to major */
+  pub minor: Compas,
   /**for move answer*/
   pub answer_xy: [usize; 2],
   /**for surrender answer*/
@@ -33,6 +35,7 @@ impl Finder {
     Finder {
       fresh: true,
       major: Compas::CENTRAL,
+      minor: Compas::CENTRAL,
       answer_xy: [usize::MAX, usize::MAX],
       enemy_xy: [usize::MAX, usize::MAX],
       player_xy: [usize::MAX, usize::MAX],
@@ -65,6 +68,7 @@ impl Finder {
       self.enemy_xy = enemy_xy;
       // todo: find the enemy direction N(-y) S(+y) W(-x) E(+x), x8 directions using enum,
       self.major = self.find_direction(player_xy, enemy_xy);
+      self.minor = self.find_opposite_direction(self.major);
     }
 
     /*

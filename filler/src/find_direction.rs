@@ -24,5 +24,20 @@ impl Finder {
     else { Compas::SE };
     direction
   }
+
+  /** find direction opposite to incoming */
+  pub fn find_opposite_direction(&mut self, incoming:Compas)-> Compas {
+    match incoming {
+      Compas::N => Compas::S,
+      Compas::S => Compas::N,
+      Compas::W => Compas::E,
+      Compas::E => Compas::W,
+      Compas::NW => Compas::SE,
+      Compas::NE => Compas::SW,
+      Compas::SW => Compas::NE,
+      Compas::SE => Compas::NW,
+      Compas::CENTRAL => Compas::CENTRAL,
+    }
+  }
   
 }

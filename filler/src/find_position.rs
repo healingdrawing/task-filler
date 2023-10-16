@@ -31,16 +31,17 @@ impl Finder {
     let anfield = &parser.anfield;
     let piece = &parser.piece;
     let player = &parser.player_char;
+    let enemy_char = &parser.enemy_char;
     
     /* the piece position */
     let mut answer_xy = [usize::MAX, usize::MAX];
     /* the most argessive enemy cell position */
-    let mut enemy_xy = [usize::MAX, usize::MAX];
+    let agressive_enemy_xy = self.find_agressive(&parser, enemy_char, self.minor);
     /* the most argessive player cell position */
-    let mut player_xy = [usize::MAX, usize::MAX];
+    let agressive_player_xy = self.find_agressive(&parser, player, self.major);
     
     //todo: implement.
-    /* to default values for most agressive cells */
+    /* to default values for correct piece position */
     let mut fresh_agressive_calculation:bool = true;
     
     let piece_height = piece.len();
