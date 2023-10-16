@@ -20,6 +20,10 @@ pub struct Finder {
   pub fresh: bool,
   /**major direction to enemy in the beginning*/
   pub major: Compas,
+  /**major relative left direction */
+  pub major_left: Compas,
+  /**major relative right direction */
+  pub major_right: Compas,
   /**minor direction, opposite to major */
   pub minor: Compas,
   /**for move answer*/
@@ -35,6 +39,8 @@ impl Finder {
     Finder {
       fresh: true,
       major: Compas::CENTRAL,
+      major_left: Compas::CENTRAL,
+      major_right: Compas::CENTRAL,
       minor: Compas::CENTRAL,
       answer_xy: [usize::MAX, usize::MAX],
       enemy_xy: [usize::MAX, usize::MAX],
@@ -68,6 +74,9 @@ impl Finder {
       self.enemy_xy = enemy_xy;
       // todo: find the enemy direction N(-y) S(+y) W(-x) E(+x), x8 directions using enum,
       self.major = self.find_direction(player_xy, enemy_xy);
+      self.major_left = self.find_left_direction(self.major);
+      self.major_right = self.find_right_direction(self.major);
+      
       self.minor = self.find_opposite_direction(self.major);
     }
 

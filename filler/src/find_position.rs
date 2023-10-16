@@ -30,7 +30,7 @@ impl Finder {
   pub fn find_position(&mut self, parser: &mut Parser) -> [usize;2] {
     let anfield = &parser.anfield;
     let piece = &parser.piece;
-    let player = &parser.player_char;
+    let player_char = &parser.player_char;
     let enemy_char = &parser.enemy_char;
     
     /* the piece position */
@@ -40,37 +40,55 @@ impl Finder {
     let closer_to_agressive_enemy_distance = self.find_cell_min_distance_to_cell_of_opposite_team(anfield, agressive_enemy_xy);
     let mut minimal_to_agressive_enemy_distance = closer_to_agressive_enemy_distance;
 
+    // todo: implement. still not implemented
     /* the most argessive player cell position */
-    let agressive_player_xy = self.find_agressive(&parser, player, self.major);
+    let agressive_player_xy = self.find_agressive(&parser, player_char, self.major);
+    /* the most argessive player cell position on the left side of the major direction */
+    let agressive_player_left_xy = self.find_agressive(&parser, player_char, self.major_left);
+    /* the most argessive player cell position on the right side of the major direction */
+    let agressive_player_right_xy = self.find_agressive(&parser, player_char, self.major_right);
     
     //todo: implement.
     /* to default values for correct piece position */
-    let mut fresh_agressive_calculation:bool = true;
+    let mut fresh_calculation:bool = true;
     
     let piece_height = piece.len();
     let piece_width = piece[0].len();
-    append_to_file(DEBUG_FILE, &"before piece position iteration".to_string()).expect("cannot write to debug file");
+    
     for y in 0..anfield.len() - piece_height + 1 {
       for x in 0..anfield[0].len() - piece_width + 1 {
-        append_to_file(DEBUG_FILE, &"before check position is correct".to_string()).expect("cannot write to debug file");
-        if self.position_is_correct(anfield, piece, x, y, player){
+        
+        if self.position_is_correct(anfield, piece, x, y, player_char){
           //todo: implement.
           /*
-          check the most agressively placed enemy cell, opposite the major direction
-          check the most agressively placed player cell, on the major direction
-          update the answer_xy, if the coordinates satisfy at least one of the conditions above(complete the requirements)
+            check the most agressively placed enemy cell, opposite the major direction
+            check the most agressively placed player cell, on the major direction
+            update the answer_xy, if the coordinates satisfy at least one of the conditions above(complete the requirements)
           */
-          append_to_file(DEBUG_FILE, &"inside position is correct TRUE".to_string()).expect("cannot write to debug file");
-
-          if fresh_agressive_calculation {/*use the first found correct position for the piece as default */
-            fresh_agressive_calculation = false;
+          
+          if fresh_calculation {/*use the first found correct position for the piece as default */
+            fresh_calculation = false;
             answer_xy = [x, y];
           } else {
-            let closer_piece_to_agressive_enemy_distance = self.find_piece_cell_min_distance_to_cell_xy(anfield, piece, [x,y], agressive_enemy_xy);
-            if closer_piece_to_agressive_enemy_distance < minimal_to_agressive_enemy_distance {
-              minimal_to_agressive_enemy_distance = closer_piece_to_agressive_enemy_distance;
+            /*first priority to prevent the invasion from the opposite direction */
+            let closer_piece_cell_distance_to_agressive_enemy_cell =
+            self.find_piece_cell_min_distance_to_cell_xy(
+              anfield, piece,
+              [x,y],
+              agressive_enemy_xy);
+            if closer_piece_cell_distance_to_agressive_enemy_cell < minimal_to_agressive_enemy_distance {
+              minimal_to_agressive_enemy_distance = closer_piece_cell_distance_to_agressive_enemy_cell;
               answer_xy = [x, y];
             }
+            //todo: implement.
+            /*
+             add check if the minimal_to_agressive_enemy_distance longer than diagonal of the piece etc
+             than continue to check the most agressively placed player cell, on the major direction,
+             because the enemy cell is not so close to the piece, even if it is the first priority
+             And the player way stuff must manage the closest distance to the any enemy cell too,
+             before it can replace the first priority calculated answer_xy
+            */
+
             //todo: implement.
             /*also think about add as statement the requirement for piece
             to have some more agressively positioned cell then enemy*/

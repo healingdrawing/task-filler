@@ -25,6 +25,27 @@ impl Finder {
     direction
   }
 
+  /** find left direction close to 90 degrees angle relative to incoming */
+  pub fn find_left_direction(&mut self, incoming:Compas)-> Compas {
+    match incoming {
+      Compas::N => Compas::W,
+      Compas::S => Compas::E,
+      Compas::W => Compas::S,
+      Compas::E => Compas::N,
+      Compas::NW => Compas::SW,
+      Compas::NE => Compas::NW,
+      Compas::SW => Compas::SE,
+      Compas::SE => Compas::NE,
+      Compas::CENTRAL => Compas::CENTRAL,
+    }
+  }
+
+  /** find right direction close to -90 degrees relative to incoming */
+  pub fn find_right_direction(&mut self, incoming:Compas)-> Compas {
+    let opposite = self.find_opposite_direction(incoming);
+    self.find_left_direction(opposite)
+  }
+
   /** find direction opposite to incoming */
   pub fn find_opposite_direction(&mut self, incoming:Compas)-> Compas {
     match incoming {
