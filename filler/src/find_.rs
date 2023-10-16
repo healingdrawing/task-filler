@@ -83,7 +83,7 @@ impl Finder {
     to cut their way first if it is possible.
      */
 
-    self.answer_xy = [2, 2]; //todo: remove this line, it is only for test
+    self.answer_xy = self.find_position(parser); //todo: implement. it is raw
     
     //clean parser
     parser.reset();

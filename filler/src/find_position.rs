@@ -1,6 +1,6 @@
 use std::collections::VecDeque;
 
-use crate::{find_::{Finder, Compas}, parse_::Parser};
+use crate::{find_::{Finder, Compas}, parse_::Parser, debug::{DEBUG_FILE, append_to_file}};
 
 impl Finder {
   /** todo: find the optimal position for the piece
@@ -37,6 +37,9 @@ impl Finder {
     let mut answer_xy = [usize::MAX, usize::MAX];
     /* the most argessive enemy cell position */
     let agressive_enemy_xy = self.find_agressive(&parser, enemy_char, self.minor);
+    let closer_to_agressive_enemy_distance = self.find_cell_min_distance_to_cell_of_opposite_team(anfield, agressive_enemy_xy);
+    let mut minimal_to_agressive_enemy_distance = closer_to_agressive_enemy_distance;
+
     /* the most argessive player cell position */
     let agressive_player_xy = self.find_agressive(&parser, player, self.major);
     
@@ -46,9 +49,10 @@ impl Finder {
     
     let piece_height = piece.len();
     let piece_width = piece[0].len();
-    
+    append_to_file(DEBUG_FILE, &"before piece position iteration".to_string()).expect("cannot write to debug file");
     for y in 0..anfield.len() - piece_height + 1 {
       for x in 0..anfield[0].len() - piece_width + 1 {
+        append_to_file(DEBUG_FILE, &"before check position is correct".to_string()).expect("cannot write to debug file");
         if self.position_is_correct(anfield, piece, x, y, player){
           //todo: implement.
           /*
@@ -56,32 +60,27 @@ impl Finder {
           check the most agressively placed player cell, on the major direction
           update the answer_xy, if the coordinates satisfy at least one of the conditions above(complete the requirements)
           */
-          
+          append_to_file(DEBUG_FILE, &"inside position is correct".to_string()).expect("cannot write to debug file");
+          //fix: never fired
+
           if fresh_agressive_calculation {/*use the first found correct position for the piece as default */
             fresh_agressive_calculation = false;
             answer_xy = [x, y];
-            continue;
           } else {
-            
-            /*check the most agressively placed enemy cell, opposite the major direction*/
-            match self.major {
-              Compas::N => {
-                 
-              },
-              Compas::S => {},
-              Compas::W => {},
-              Compas::E => {},
-              Compas::NW => {},
-              Compas::NE => {},
-              Compas::SW => {},
-              Compas::SE => {},
-              Compas::CENTRAL => {},
+            let closer_piece_to_agressive_enemy_distance = self.find_piece_cell_min_distance_to_cell_xy(anfield, piece, [x,y], agressive_enemy_xy);
+            if closer_piece_to_agressive_enemy_distance < minimal_to_agressive_enemy_distance {
+              minimal_to_agressive_enemy_distance = closer_piece_to_agressive_enemy_distance;
+              answer_xy = [x, y];
             }
+            //todo: implement.
+            /*also think about add as statement the requirement for piece
+            to have some more agressively positioned cell then enemy*/
           }
+
         }
       }
     }
-    
+    append_to_file(&format!("answer_xy: {} {}", answer_xy[0], answer_xy[1]), DEBUG_FILE);
     answer_xy
   }
   
