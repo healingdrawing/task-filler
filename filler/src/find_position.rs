@@ -117,7 +117,7 @@ impl Finder {
             */
             
             /* try to refresh most_agressive_xy using each position of the piece */
-            
+
             let new_most_agressive_xy = self.find_more_agressive(
               piece,
               &[x,y],
@@ -136,6 +136,9 @@ impl Finder {
               most_agressive_xy = new_most_agressive_xy;
               agressive_answer_xy = [x, y];
             }
+
+            //todo: implement.
+            /* bottom after append to file, check who is more agressive or close to enemy, not sure. looks not clear */
             
           }
 
