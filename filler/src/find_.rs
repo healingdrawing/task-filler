@@ -32,6 +32,8 @@ pub struct Finder {
   pub enemy_xy: [usize; 2],
   /**for potential implementation of more compact placement(not agressive) */
   pub player_xy: [usize; 2],
+  /**for first step*/
+  pub first_answer: bool,
 }
 
 impl Finder {
@@ -45,11 +47,20 @@ impl Finder {
       answer_xy: [usize::MAX, usize::MAX],
       enemy_xy: [usize::MAX, usize::MAX],
       player_xy: [usize::MAX, usize::MAX],
+      first_answer: true,
     }
   }
-
+  
   /** get the answer(coordinates) as String */
-  pub fn answer(&self) -> String {format!("{} {}", self.answer_xy[0], self.answer_xy[1])}
+  pub fn answer(&mut self) -> String {
+    if self.first_answer{
+      self.first_answer = false;
+      format!("{} {}\n \n + shotgun groin shot", self.answer_xy[0], self.answer_xy[1])
+    }
+    else{
+      format!("{} {}\n \n + shotgun groin shot", self.answer_xy[0], self.answer_xy[1])
+    }
+  }
   
   pub fn find_answer(&mut self, parser: &mut Parser) {
     let anfield = &parser.anfield;
@@ -61,7 +72,7 @@ impl Finder {
     
     // clean the data
     // build the 2d array field (row,column)yx = Vec<Vec<char>> , to represent the field
-
+    
     if self.fresh{
       self.fresh = false;
       // find the player position
@@ -79,7 +90,7 @@ impl Finder {
       
       self.minor = self.find_opposite_direction(self.major);
     }
-
+    
     /*
     [only the first step]
     find the player position
@@ -90,8 +101,8 @@ impl Finder {
     to find the enemy cells which are directed to the player side
     and moved already as possible deep in player direction,
     to cut their way first if it is possible.
-     */
-
+    */
+    
     self.answer_xy = self.find_position(parser); //todo: implement. it is raw
     
     //clean parser
