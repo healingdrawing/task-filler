@@ -1,6 +1,6 @@
 use std::collections::VecDeque;
 
-use crate::{find_::Finder, parse_::Parser, debug::{DEBUG_FILE, append_to_file}};
+use crate::{find_::{Finder, Compas}, parse_::Parser, debug::{DEBUG_FILE, append_to_file}};
 
 impl Finder {
   /** todo: find the optimal position for the piece
@@ -66,9 +66,29 @@ impl Finder {
     
     let piece_height = piece.len();
     let piece_width = piece[0].len();
+
+    /* prepare iterators depend on self.major direction */
+    let y_iterator = match self.major {
+      Compas::NE | Compas::N | Compas::NW | Compas::W | Compas::CENTRAL =>
+      (0..anfield.len() - piece_height + 1).rev().collect::<Vec<_>>().into_iter(),
+      
+      Compas::SW | Compas::S | Compas::SE | Compas::E =>
+      (0..anfield.len() - piece_height + 1).collect::<Vec<_>>().into_iter(),
+    };
+
+    let x_iterator = match self.major {
+      Compas::NW | Compas::W | Compas::SW | Compas::S =>
+      (0..anfield[0].len() - piece_width + 1).rev().collect::<Vec<_>>().into_iter(),
+      
+      Compas::SE | Compas::E | Compas::NE | Compas::N | Compas::CENTRAL =>
+      (0..anfield[0].len() - piece_width + 1).collect::<Vec<_>>().into_iter(),
+    };
     
-    for y in 0..anfield.len() - piece_height + 1 {
-      for x in 0..anfield[0].len() - piece_width + 1 {
+    // for y in 0..anfield.len() - piece_height + 1 {
+    //   for x in 0..anfield[0].len() - piece_width + 1 {
+
+    for y in y_iterator {
+      for x in x_iterator.clone() {
         
         if self.position_is_correct(anfield, piece, x, y, player_char){
           //todo: implement.
@@ -104,13 +124,13 @@ impl Finder {
               And the player way stuff must manage the closest distance to the any enemy cell too,
               before it can replace the first priority calculated answer_xy
             */
-            if minimal_to_agressive_enemy_distance < piece_diagonal {
-              /*
-                keep to focus on first priority,
-                let is say the piece is close enough to the enemy agressive cell,
-              */
-              continue;
-            }
+            // if minimal_to_agressive_enemy_distance < piece_diagonal {
+            //   /*
+            //     keep to focus on first priority,
+            //     let is say the piece is close enough to the enemy agressive cell,
+            //   */
+            //   continue;
+            // }
             /*
               second priority. //todo: remove after implement.
               Try to move the piece as possible deeper to major direction
