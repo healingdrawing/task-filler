@@ -32,22 +32,28 @@ impl Finder {
     let piece = &parser.piece;
     let player_char = &parser.player_char;
     let enemy_char = &parser.enemy_char;
+
+    /* for more agressive piece cell check */
+    let anfield_size_xy = [anfield[0].len(), anfield.len()];
     
     /* the piece position */
     let mut answer_xy = [usize::MAX, usize::MAX];
     /* the most argessive enemy cell position */
     let agressive_enemy_xy = self.find_agressive(&parser, enemy_char, self.minor);
-    let closer_to_agressive_enemy_distance = self.find_cell_min_distance_to_cell_of_opposite_team(anfield, agressive_enemy_xy);
+    let closer_to_agressive_enemy_distance = self.find_any_cell_min_distance_to_cell_of_opposite_team(anfield, agressive_enemy_xy);
     let mut minimal_to_agressive_enemy_distance = closer_to_agressive_enemy_distance;
 
     // todo: implement. still not implemented
     let piece_diagonal = self.diagonal_of_the_piece_not_empty_cells_rectangle(piece);
     /* the most argessive player cell position */
-    let agressive_player_xy = self.find_agressive(&parser, player_char, self.major);
+    let mut most_agressive_xy = self.find_agressive(&parser, player_char, self.major);
+    let closer_to_agressive_player_distance = self.find_any_cell_min_distance_to_cell_of_opposite_team(anfield, most_agressive_xy);
+    let mut minimal_to_agressive_player_distance = closer_to_agressive_player_distance;
+
     /* the most argessive player cell position on the left side of the major direction */
-    let agressive_player_left_xy = self.find_agressive(&parser, player_char, self.major_left);
+    let most_agressive_left_xy = self.find_agressive(&parser, player_char, self.major_left);
     /* the most argessive player cell position on the right side of the major direction */
-    let agressive_player_right_xy = self.find_agressive(&parser, player_char, self.major_right);
+    let most_agressive_right_xy = self.find_agressive(&parser, player_char, self.major_right);
     
     //todo: implement.
     /* to default values for correct piece position */
@@ -104,7 +110,15 @@ impl Finder {
               second priority. //todo: remove after implement.
               Try to move the piece as possible deeper to major direction
             */
-
+            
+            /* try to refresh most_agressive_xy using each position of the piece */
+            most_agressive_xy = self.find_more_agressive(
+              piece,
+              &[x,y],
+              &most_agressive_xy,
+              &self.major.clone(),
+              &anfield_size_xy
+            );
             
           }
 

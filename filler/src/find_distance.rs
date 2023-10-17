@@ -17,7 +17,7 @@ impl Finder {
    * if opposite_team_cell_xy of anfield is a or @,
    * then the team cells is s or $,
    */
-  pub fn find_cell_min_distance_to_cell_of_opposite_team(&mut self,anfield: &VecDeque<VecDeque<char>>, opposite_team_cell_xy:[usize;2])-> f64 {
+  pub fn find_any_cell_min_distance_to_cell_of_opposite_team(&mut self,anfield: &VecDeque<VecDeque<char>>, opposite_team_cell_xy:[usize;2])-> f64 {
     let team_char =
     if anfield[opposite_team_cell_xy[1]][opposite_team_cell_xy[0]] == 'a'
     || anfield[opposite_team_cell_xy[1]][opposite_team_cell_xy[0]] == '@'
