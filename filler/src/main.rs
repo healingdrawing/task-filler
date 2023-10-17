@@ -11,6 +11,7 @@ mod find_direction;
 mod find_position;
 mod find_enemy_agressive;
 mod find_agressive;
+mod find_diagonal;
 
 use debug::{append_to_file, recreate_file, DEBUG_FILE};
 use std::io::{self};

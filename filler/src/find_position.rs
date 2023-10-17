@@ -41,6 +41,7 @@ impl Finder {
     let mut minimal_to_agressive_enemy_distance = closer_to_agressive_enemy_distance;
 
     // todo: implement. still not implemented
+    let piece_diagonal = self.diagonal_of_the_piece_not_empty_cells_rectangle(piece);
     /* the most argessive player cell position */
     let agressive_player_xy = self.find_agressive(&parser, player_char, self.major);
     /* the most argessive player cell position on the left side of the major direction */
@@ -81,17 +82,30 @@ impl Finder {
               answer_xy = [x, y];
             }
             //todo: implement.
-            /*
-             add check if the minimal_to_agressive_enemy_distance longer than diagonal of the piece etc
-             than continue to check the most agressively placed player cell, on the major direction,
-             because the enemy cell is not so close to the piece, even if it is the first priority
-             And the player way stuff must manage the closest distance to the any enemy cell too,
-             before it can replace the first priority calculated answer_xy
-            */
-
-            //todo: implement.
             /*also think about add as statement the requirement for piece
             to have some more agressively positioned cell then enemy*/
+
+            //todo: implement.
+            /*
+              add check if the minimal_to_agressive_enemy_distance longer than diagonal of the piece etc
+              than continue to check the most agressively placed player cell, on the major direction,
+              because the enemy cell is not so close to the piece, even if it is the first priority
+              And the player way stuff must manage the closest distance to the any enemy cell too,
+              before it can replace the first priority calculated answer_xy
+            */
+            if minimal_to_agressive_enemy_distance < piece_diagonal {
+              /*
+                keep to focus on first priority,
+                let is say the piece is close enough to the enemy agressive cell,
+              */
+              continue;
+            }
+            /*
+              second priority. //todo: remove after implement.
+              Try to move the piece as possible deeper to major direction
+            */
+
+            
           }
 
         }
