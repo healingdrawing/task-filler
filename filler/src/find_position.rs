@@ -44,9 +44,14 @@ impl Finder {
     let mut minimal_to_agressive_enemy_distance = closer_to_agressive_enemy_distance;
 
     // todo: implement. still not implemented
+    
+    let mut agressive_answer_xy = [usize::MAX, usize::MAX];
     let piece_diagonal = self.diagonal_of_the_piece_not_empty_cells_rectangle(piece);
     /* the most argessive player cell position */
     let mut most_agressive_xy = self.find_agressive(&parser, player_char, self.major);
+    
+    // let mut agressive_xy = most_agressive_xy.clone();
+
     let closer_to_agressive_player_distance = self.find_any_cell_min_distance_to_cell_of_opposite_team(anfield, most_agressive_xy);
     let mut minimal_to_agressive_player_distance = closer_to_agressive_player_distance;
 
@@ -112,13 +117,25 @@ impl Finder {
             */
             
             /* try to refresh most_agressive_xy using each position of the piece */
-            most_agressive_xy = self.find_more_agressive(
+            
+            let new_most_agressive_xy = self.find_more_agressive(
               piece,
               &[x,y],
               &most_agressive_xy,
               &self.major.clone(),
               &anfield_size_xy
             );
+
+            /* if the new most agressive player cell is more agressive than the previous one */
+            if self.first_more_agressive_than_second(
+              &new_most_agressive_xy,
+              &most_agressive_xy,
+              &self.major.clone(),
+              &anfield_size_xy
+            ) {
+              most_agressive_xy = new_most_agressive_xy;
+              agressive_answer_xy = [x, y];
+            }
             
           }
 
