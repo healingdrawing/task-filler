@@ -6,4 +6,4 @@ rm debug.txt
 
 # ./linux_game_engine -f maps/map01 -p2 linux_robots/bender -p1 solution/filler
 
-./linux_game_engine -f maps/map02 -p2 solution/filler -p1 linux_robots/bender
+./linux_game_engine -f maps/map01 -p1 solution/filler -p2 linux_robots/terminator

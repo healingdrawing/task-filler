@@ -36,13 +36,38 @@ impl Parser {
     
     if self.piece.len() == self.piece_size[1] {
       
-      // self.trim_empty_rows_and_columns();//todo: danger check this, not sure it is correct
+      self.trim_empty_rows_and_columns_from_the_end();//works, looks like not crushes
+      // self.trim_empty_rows_and_columns_from_the_beginning();//debug danger it craps the process
       
       self.state = ParserState::GOT_PIECE;
       append_to_file(DEBUG_FILE, &format!("{:?}",self.piece)).expect("Unable to write data");
     }
   }
   
-  
+  fn trim_empty_rows_and_columns_from_the_end(&mut self){
+    // cut empty rows from the end
+    while self.piece.back().unwrap().iter().all(|&x| x == '.') {
+      self.piece.pop_back();
+    }
+    // cut empty columns from the end
+    while self.piece.iter().all(|row| row.back().unwrap() == &'.') {
+      for row in &mut self.piece {
+        row.pop_back();
+      }
+    }
+  }
+
+  // fn trim_empty_rows_and_columns_from_the_beginning(&mut self){
+  //   // cut empty rows from the beginning
+  //   while self.piece.front().unwrap().iter().all(|&x| x == '.') {
+  //     self.piece.pop_front();
+  //   }
+  //   // cut empty columns from the beginning
+  //   while self.piece.iter().all(|row| row.front().unwrap() == &'.') {
+  //     for row in &mut self.piece {
+  //       row.pop_front();
+  //     }
+  //   }
+  // }
   
 }

@@ -1,6 +1,6 @@
 use std::collections::VecDeque;
 
-use crate::{find_::{Finder, Compas, MajorStrategy}, parse_::Parser, debug::{DEBUG_FILE, append_to_file}};
+use crate::{find_::{Finder, Compas, MajorStrategy, ForkDirection}, parse_::Parser, debug::{DEBUG_FILE, append_to_file}};
 
 impl Finder {
   /** todo: find the optimal position for the piece
@@ -65,6 +65,7 @@ impl Finder {
       (0..anfield[0].len() - piece_width + 1).collect::<Vec<_>>().into_iter(),
     };
     
+    //todo: SPEAR does not used at the moment, because less effective finally, fail lot of cases on the audit question
     if self.major_strategy == MajorStrategy::SPEAR {/*agressively invade face direction */
       let mut spear_strategy_still_effective = false; /*false - no more ways to decrease distance from piece to most enemy agressive cell*/
       for y in y_iterator.clone() {
@@ -118,13 +119,12 @@ impl Finder {
       if spear_strategy_still_effective {
         return answer_xy;
       } else {
-        // self.major_strategy = MajorStrategy::FORK;
+        self.major_strategy = MajorStrategy::FORK;
         fresh_calculation = true;
       }
       
     }
     
-    // todo: in some reasons it always worse than without fork strategy
     if self.major_strategy == MajorStrategy::FORK {/*agressively invade to fork sides */
       self.switch_fork_direction();
       
@@ -189,15 +189,16 @@ impl Finder {
       if fork_strategy_still_effective
       {
         if buffer_global_max_distance_left_fork < buffer_global_max_distance_right_fork
+        && self.fork_direction == ForkDirection::RIGHT
         {
           self.global_max_distance_proportion_left_fork = buffer_global_max_distance_left_fork.clone();
           return answer_xy_left_fork;
-        } else {
+        } else if self.fork_direction == ForkDirection::LEFT {
           self.global_max_distance_proportion_right_fork = buffer_global_max_distance_right_fork.clone();
           return answer_xy_right_fork;
         }
       }else {
-        self.major_strategy = MajorStrategy::SPEAR;
+        // self.major_strategy = MajorStrategy::SPEAR;
       }
       
     }
