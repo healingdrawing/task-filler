@@ -1,7 +1,5 @@
 use std::collections::VecDeque;
 
-use crate::debug::{append_to_file, DEBUG_FILE};
-
 #[derive(Debug)]
 pub enum ParserState {
   WAITING, // fired only once , in the beginning , because engine sends it only once

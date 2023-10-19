@@ -18,18 +18,23 @@ impl Finder {
     /*
       determine the most far point of anfield, according to player_major_direction
     */
-    let far_xy = 
-    match player_major_direction {
-      Compas::N => {[(asxy[0] - 1)/2, asxy[1] - 1]},
-      Compas::S => {[(asxy[0] - 1)/2, 0]},
-      Compas::W => {[asxy[0] - 1, (asxy[1] - 1)/2]},
-      Compas::E => {[0, (asxy[1] - 1)/2]},
-      Compas::NW => {[asxy[0] - 1, asxy[1] - 1]},
-      Compas::NE => {[0, asxy[1] - 1]},
-      Compas::SW => {[asxy[0] - 1, 0]},
-      Compas::SE => {[0, 0]},
-      Compas::CENTRAL => {[usize::MAX, usize::MAX]}, /* should never fire */
-    };
+    // let far_xy = 
+    // match player_major_direction {
+    //   Compas::N => {[(asxy[0] - 1)/2, asxy[1] - 1]},
+    //   Compas::S => {[(asxy[0] - 1)/2, 0]},
+    //   Compas::W => {[asxy[0] - 1, (asxy[1] - 1)/2]},
+    //   Compas::E => {[0, (asxy[1] - 1)/2]},
+    //   Compas::NW => {[asxy[0] - 1, asxy[1] - 1]},
+    //   Compas::NE => {[0, asxy[1] - 1]},
+    //   Compas::SW => {[asxy[0] - 1, 0]},
+    //   Compas::SE => {[0, 0]},
+    //   Compas::CENTRAL => {[usize::MAX, usize::MAX]}, /* should never fire */
+    // };
+
+    let far_xy = self.find_most_far_xy_opposite_the_direction(
+      asxy,
+      player_major_direction.clone()
+    );
 
     let mut most_agressive_xy = most_agressive_xy.clone();
 
@@ -124,93 +129,93 @@ impl Finder {
     most_agressive_xy
   }
 
-  pub fn first_more_agressive_than_second(
-    &mut self,
-    first_xy: &[usize; 2],
-    second_xy: &[usize; 2],
-    player_major_direction: &Compas,
-    anfield_size_xy: &[usize; 2],
-  ) -> bool {
-    let asxy = anfield_size_xy;
+  // pub fn first_more_agressive_than_second(
+  //   &mut self,
+  //   first_xy: &[usize; 2],
+  //   second_xy: &[usize; 2],
+  //   player_major_direction: &Compas,
+  //   anfield_size_xy: &[usize; 2],
+  // ) -> bool {
+  //   let asxy = anfield_size_xy;
 
-    /*
-      determine the most far point of anfield, according to player_major_direction
-    */
-    let far_xy = 
-    match player_major_direction {
-      Compas::N => {[(asxy[0] - 1)/2, asxy[1] - 1]},
-      Compas::S => {[(asxy[0] - 1)/2, 0]},
-      Compas::W => {[asxy[0] - 1, (asxy[1] - 1)/2]},
-      Compas::E => {[0, (asxy[1] - 1)/2]},
-      Compas::NW => {[asxy[0] - 1, asxy[1] - 1]},
-      Compas::NE => {[0, asxy[1] - 1]},
-      Compas::SW => {[asxy[0] - 1, 0]},
-      Compas::SE => {[0, 0]},
-      Compas::CENTRAL => {[usize::MAX, usize::MAX]}, /* should never fire */
-    };
+  //   /*
+  //     determine the most far point of anfield, according to player_major_direction
+  //   */
+  //   let far_xy = 
+  //   match player_major_direction {
+  //     Compas::N => {[(asxy[0] - 1)/2, asxy[1] - 1]},
+  //     Compas::S => {[(asxy[0] - 1)/2, 0]},
+  //     Compas::W => {[asxy[0] - 1, (asxy[1] - 1)/2]},
+  //     Compas::E => {[0, (asxy[1] - 1)/2]},
+  //     Compas::NW => {[asxy[0] - 1, asxy[1] - 1]},
+  //     Compas::NE => {[0, asxy[1] - 1]},
+  //     Compas::SW => {[asxy[0] - 1, 0]},
+  //     Compas::SE => {[0, 0]},
+  //     Compas::CENTRAL => {[usize::MAX, usize::MAX]}, /* should never fire */
+  //   };
 
-    /*from far point to first cell */
-    let first_distance = self.find_distance(
-      far_xy,
-      *first_xy
-    );
+  //   /*from far point to first cell */
+  //   let first_distance = self.find_distance(
+  //     far_xy,
+  //     *first_xy
+  //   );
 
-    /*from far point to second cell */
-    let second_distance = self.find_distance(
-      far_xy,
-      *second_xy
-    );
+  //   /*from far point to second cell */
+  //   let second_distance = self.find_distance(
+  //     far_xy,
+  //     *second_xy
+  //   );
 
-    let first_distance_longer = first_distance > second_distance;
+  //   let first_distance_longer = first_distance > second_distance;
 
-    match player_major_direction {
-      Compas::N => {
-        first_xy[1] < second_xy[1]
-        || first_xy[1] == second_xy[1] && first_distance_longer 
-      },
-      Compas::S => {
-        first_xy[1] > second_xy[1]
-        || first_xy[1] == second_xy[1] && first_distance_longer
-      },
-      Compas::W => {
-        first_xy[0] < second_xy[0]
-        || first_xy[0] == second_xy[0] && first_distance_longer
-      },
-      Compas::E => {
-        first_xy[0] > second_xy[0]
-        || first_xy[0] == second_xy[0] && first_distance_longer
-      },
-      Compas::NW => {
-        first_xy[0] < second_xy[0] && first_xy[1] < second_xy[1]
-        || (
-          first_xy[0] == second_xy[0] && first_xy[1] < second_xy[1]
-          || first_xy[0] < second_xy[0] && first_xy[1] == second_xy[1]
-        ) && first_distance_longer
-      },
-      Compas::NE => {
-        first_xy[0] > second_xy[0] && first_xy[1] < second_xy[1]
-        || (
-          first_xy[0] == second_xy[0] && first_xy[1] < second_xy[1]
-          || first_xy[0] > second_xy[0] && first_xy[1] == second_xy[1]
-        ) && first_distance_longer
-      },
-      Compas::SW => {
-        first_xy[0] < second_xy[0] && first_xy[1] > second_xy[1]
-        || (
-          first_xy[0] == second_xy[0] && first_xy[1] > second_xy[1]
-          || first_xy[0] < second_xy[0] && first_xy[1] == second_xy[1]
-        ) && first_distance_longer
-      },
-      Compas::SE => {
-        first_xy[0] > second_xy[0] && first_xy[1] > second_xy[1]
-        || (
-          first_xy[0] == second_xy[0] && first_xy[1] > second_xy[1]
-          || first_xy[0] > second_xy[0] && first_xy[1] == second_xy[1]
-        ) && first_distance_longer
-      },
-      Compas::CENTRAL => {false}, /* should never fire */
-    }
+  //   match player_major_direction {
+  //     Compas::N => {
+  //       first_xy[1] < second_xy[1]
+  //       || first_xy[1] == second_xy[1] && first_distance_longer 
+  //     },
+  //     Compas::S => {
+  //       first_xy[1] > second_xy[1]
+  //       || first_xy[1] == second_xy[1] && first_distance_longer
+  //     },
+  //     Compas::W => {
+  //       first_xy[0] < second_xy[0]
+  //       || first_xy[0] == second_xy[0] && first_distance_longer
+  //     },
+  //     Compas::E => {
+  //       first_xy[0] > second_xy[0]
+  //       || first_xy[0] == second_xy[0] && first_distance_longer
+  //     },
+  //     Compas::NW => {
+  //       first_xy[0] < second_xy[0] && first_xy[1] < second_xy[1]
+  //       || (
+  //         first_xy[0] == second_xy[0] && first_xy[1] < second_xy[1]
+  //         || first_xy[0] < second_xy[0] && first_xy[1] == second_xy[1]
+  //       ) && first_distance_longer
+  //     },
+  //     Compas::NE => {
+  //       first_xy[0] > second_xy[0] && first_xy[1] < second_xy[1]
+  //       || (
+  //         first_xy[0] == second_xy[0] && first_xy[1] < second_xy[1]
+  //         || first_xy[0] > second_xy[0] && first_xy[1] == second_xy[1]
+  //       ) && first_distance_longer
+  //     },
+  //     Compas::SW => {
+  //       first_xy[0] < second_xy[0] && first_xy[1] > second_xy[1]
+  //       || (
+  //         first_xy[0] == second_xy[0] && first_xy[1] > second_xy[1]
+  //         || first_xy[0] < second_xy[0] && first_xy[1] == second_xy[1]
+  //       ) && first_distance_longer
+  //     },
+  //     Compas::SE => {
+  //       first_xy[0] > second_xy[0] && first_xy[1] > second_xy[1]
+  //       || (
+  //         first_xy[0] == second_xy[0] && first_xy[1] > second_xy[1]
+  //         || first_xy[0] > second_xy[0] && first_xy[1] == second_xy[1]
+  //       ) && first_distance_longer
+  //     },
+  //     Compas::CENTRAL => {false}, /* should never fire */
+  //   }
 
-  }
+  // }
     
 }

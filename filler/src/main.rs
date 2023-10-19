@@ -9,10 +9,10 @@ mod find_enemy;
 mod find_distance;
 mod find_direction;
 mod find_position;
-mod find_enemy_agressive;
 mod find_agressive;
 mod find_diagonal;
 mod find_more_agressive;
+mod find_most_far;
 
 use debug::{append_to_file, recreate_file, DEBUG_FILE};
 use std::io::{self};

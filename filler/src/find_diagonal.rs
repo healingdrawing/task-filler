@@ -30,7 +30,7 @@ impl Finder {
    * 
    * Perhaps some extra parsing happens, and this can be some hidden key ,
    * to make something. Or it can be hidden key from the very strong robot
-   * "terminator", which source code is hidden to. Hide robot source code
+   * "terminator", which source code is hidden too. Hide robot source code
    * is reasonable, to hide solution, but not the engine. Not beautiful.
    */
   pub fn diagonal_of_the_piece_not_empty_cells_rectangle(&mut self, piece: &VecDeque<VecDeque<char>>)-> f64 {

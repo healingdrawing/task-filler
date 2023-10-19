@@ -18,7 +18,6 @@ pub enum Compas {
 pub enum MajorStrategy {
   SPEAR, // the first stage, when try to prevent enemy from moving to player side
   FORK, // the second stage, when try to cut the enemy way to half sides angle 45 +-
-  CROSS, // the third stage, when try to cut the enemy way to sides angle 90 +-
 }
 
 #[derive(Debug)]
@@ -27,11 +26,27 @@ pub struct Finder {
   pub fresh: bool,
   /**major strategy */
   pub major_strategy: MajorStrategy,
+  
   /**
    * global minimal distance from most agressive player and enemy cells
    * when it stops decreasing then it is time to change the strategy from SPEAR to FORK
    * */
   pub global_min_distance_between_most_agressive_cells: f64,
+  
+  /**global max distance aimed to major_fork_left
+   * used to check if the fork_left_strategy is still actual
+   * if new piece distance not greater than previous than check the fork_right_strategy
+   * it is a distance divided by the maximum distance of the field in the direction
+   * */
+  pub global_max_distance_proportion_left_fork: f64,
+  
+  /**global max distance aimed to major_fork_right
+   * used to check if the fork_right_strategy is still actual
+   * if new piece distance not greater than previous than check the fork_left_strategy
+   * it is a distance divided by the maximum distance of the field in the direction
+   * */
+  pub global_max_distance_proportion_right_fork: f64,
+  
   /**major direction to enemy in the beginning*/
   pub major: Compas,
   /**major relative half left direction for fork strategy, let is say 45 degrees+- from major to left */
@@ -58,14 +73,18 @@ impl Finder {
       fresh: true,
       major_strategy: MajorStrategy::SPEAR,
       global_min_distance_between_most_agressive_cells: f64::MAX,
+      
+      global_max_distance_proportion_left_fork: f64::MIN,
+      global_max_distance_proportion_right_fork: f64::MIN,
+
       major: Compas::CENTRAL,
       major_fork_left: Compas::CENTRAL,
       major_fork_right: Compas::CENTRAL,
       major_left: Compas::CENTRAL,
       major_right: Compas::CENTRAL,
       minor: Compas::CENTRAL,
-      answer_xy: [usize::MAX, usize::MAX],
-      player_xy: [usize::MAX, usize::MAX],
+      answer_xy: [usize::MIN, usize::MIN],
+      player_xy: [usize::MIN, usize::MIN],
       first_answer: true,
     }
   }
@@ -95,24 +114,11 @@ impl Finder {
       self.major = self.find_direction(player_xy, enemy_xy);
       self.major_fork_left = self.find_fork_left_direction(self.major);
       self.major_fork_right = self.find_fork_right_direction(self.major);
-      self.major_left = self.find_left_direction(self.major);
-      self.major_right = self.find_right_direction(self.major);
+      self.major_left = self.find_left_direction(self.major);// artefact
+      self.major_right = self.find_right_direction(self.major);// artefact
       
       self.minor = self.find_opposite_direction(self.major);
     }
-    
-    /*
-    above [only the first step]
-    find the player position
-    find the enemy position(the most far enemy cell) and save coordinates as surrender answer
-    find the enemy direction N(-y) S(+y) W(-x) E(+x), x8 directions using enum,
-    that is the new piece major direction and save it into finder.
-    
-    Later it can be used as way
-    to find the enemy cells which are directed to the player side
-    and moved already as possible deep in player direction,
-    to cut their way first if it is possible.
-    */
     
     self.answer_xy = self.find_position(parser); //todo: implement. it is raw
     
