@@ -42,7 +42,9 @@ fn main() {
         match parser.state {
           ParserState::GOT_PIECE => {
             let rust_crap_answer = finder.find_answer(&mut parser);
-            println!("{} {}", rust_crap_answer[0], rust_crap_answer[1]);
+            let crap_x = rust_crap_answer[0] as i128 - finder.negative_xy[0] as i128;
+            let crap_y = rust_crap_answer[1] as i128 - finder.negative_xy[1] as i128;
+            println!("{} {}", crap_x, crap_y);
             // println!("{}", finder.answer());
           },
           _ => (),

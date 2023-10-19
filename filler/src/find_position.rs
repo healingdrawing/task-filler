@@ -238,13 +238,36 @@ impl Finder {
       of the piece is placed on the player cell(any cell covered by the
         player char by the player piece placement previously)
         */
-        fn position_is_correct(&self, anfield: &VecDeque<VecDeque<char>>, piece: &VecDeque<VecDeque<char>>, x: usize, y: usize, player:&[char;2]) -> bool {
+        fn position_is_correct(&mut self, anfield: &VecDeque<VecDeque<char>>, piece: &VecDeque<VecDeque<char>>, x: usize, y: usize, player:&[char;2]) -> bool {
           
           append_to_file(DEBUG_FILE, &format!("\n\n===\ninside position is correct")).expect("cannot write to debug file");
           // append_to_file(DEBUG_FILE, &format!("anfield {:?}" ,anfield)).expect("cannot write to debug file");
           append_to_file(DEBUG_FILE, &format!("piece {:?}" ,piece)).expect("cannot write to debug file");
           append_to_file(DEBUG_FILE, &format!("x {} y {}" ,x,y)).expect("cannot write to debug file");
           append_to_file(DEBUG_FILE, &format!("player {:?}" ,player)).expect("cannot write to debug file");
+
+          /*try to clone piece, then cut the empty rows and columns at the beginning ,
+          and save negative increment for piece indices on the anfield.
+          After that when result shaped subtract indices from the final result answer */
+
+          /*clone the piece*/
+          let mut piece = piece.clone();
+
+          /*cut empty rows and columns from the beginning and collect the negative indices*/
+          let mut negative_x = usize::MIN;
+          let mut negative_y = usize::MIN;
+          while piece.front().unwrap().iter().all(|&x| x == '.') {
+            piece.pop_front();
+            negative_y += 1;
+          }
+          while piece.iter().all(|row| row.front().unwrap() == &'.') {
+            for row in &mut piece {
+              row.pop_front();
+            }
+            negative_x += 1;
+          }
+
+          self.negative_xy = [negative_x, negative_y];
           
           /*
           only one cell from the piece must be placed on the player cell, so

@@ -74,6 +74,8 @@ pub struct Finder {
   pub player_xy: [usize; 2],
   /**for first step*/
   pub first_answer: bool,
+  /** try to implement negative indices for the piece position on the anfield */
+  pub negative_xy: [usize; 2],
 }
 
 impl Finder {
@@ -96,6 +98,7 @@ impl Finder {
       answer_xy: [usize::MIN, usize::MIN],
       player_xy: [usize::MIN, usize::MIN],
       first_answer: true,
+      negative_xy: [usize::MIN, usize::MIN],
     }
   }
   
