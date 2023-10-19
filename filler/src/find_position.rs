@@ -87,24 +87,8 @@ impl Finder {
               most_agressive_enemy_xy.clone()
             );
             
-            // let piece_more_agressive_xy = self.find_more_agressive(
-            //   piece,
-            //   &[x,y].clone(),
-            //   &most_agressive_enemy_xy.clone(),
-            //   &self.major.clone(),
-            //   &anfield_size_xy.clone()
-            // );
-            
-            // let still_present_distance_before_contact = self.first_more_agressive_than_second(
-            //   &most_agressive_enemy_xy,
-            //   &piece_more_agressive_xy,
-            //   &self.major.clone(),
-            //   &anfield_size_xy
-            // );
-            
             if min_distance_from_piece_to_most_agressive_enemy_xy <
             self.global_min_distance_between_most_agressive_cells
-            // && still_present_distance_before_contact //todo this craps all
             { /*still possible decrease the distance to most agressive enemy cell */
               self.global_min_distance_between_most_agressive_cells = min_distance_from_piece_to_most_agressive_enemy_xy.clone();
               spear_strategy_still_effective = true;
@@ -129,6 +113,8 @@ impl Finder {
       self.switch_fork_direction();
       
       let mut fork_strategy_still_effective = false; /*false - no more ways to increase the progress to fork directions*/
+      let mut left_fork_strategy_still_effective = false;
+      let mut right_fork_strategy_still_effective = false;
       
       /* use buffers to rollback finally not used variant
       * after choose which one to use,
@@ -173,12 +159,14 @@ impl Finder {
             if max_distance_left_fork > buffer_global_max_distance_left_fork{
               buffer_global_max_distance_left_fork = max_distance_left_fork.clone();
               fork_strategy_still_effective = true;
+              left_fork_strategy_still_effective = true;
               answer_xy_left_fork = [x, y].clone();
             }
             
             if max_distance_right_fork > buffer_global_max_distance_right_fork{
               buffer_global_max_distance_right_fork = max_distance_right_fork.clone();
               fork_strategy_still_effective = true;
+              right_fork_strategy_still_effective = true;
               answer_xy_right_fork = [x, y].clone();
             }
             
@@ -188,77 +176,110 @@ impl Finder {
       
       if fork_strategy_still_effective
       {
-        if buffer_global_max_distance_left_fork < buffer_global_max_distance_right_fork
-        && self.fork_direction == ForkDirection::RIGHT
-        {
-          self.global_max_distance_proportion_left_fork = buffer_global_max_distance_left_fork.clone();
-          return answer_xy_left_fork;
-        } else if self.fork_direction == ForkDirection::LEFT {
-          self.global_max_distance_proportion_right_fork = buffer_global_max_distance_right_fork.clone();
-          return answer_xy_right_fork;
+        if self.fork_direction == ForkDirection::LEFT{
+          
+          if left_fork_strategy_still_effective{
+            
+            self.global_max_distance_proportion_left_fork = buffer_global_max_distance_left_fork.clone();
+            return answer_xy_left_fork.clone();
+            
+          } else if right_fork_strategy_still_effective{
+            
+            self.global_max_distance_proportion_right_fork = buffer_global_max_distance_right_fork.clone();
+            return answer_xy_right_fork.clone();
+            
+          }
+          
+        } else if self.fork_direction == ForkDirection::RIGHT{
+          
+          if right_fork_strategy_still_effective{
+            
+            self.global_max_distance_proportion_right_fork = buffer_global_max_distance_right_fork.clone();
+            return answer_xy_right_fork.clone();
+            
+          } else if left_fork_strategy_still_effective{
+            
+            self.global_max_distance_proportion_left_fork = buffer_global_max_distance_left_fork.clone();
+            return answer_xy_left_fork.clone();
+            
+          }
+          
         }
-      }else {
-        // self.major_strategy = MajorStrategy::SPEAR;
+        
+        
+        //todo old solution before separate left and right forks
+        
+        // if buffer_global_max_distance_left_fork < buffer_global_max_distance_right_fork
+        // && self.fork_direction == ForkDirection::RIGHT
+        // {
+          //   self.global_max_distance_proportion_left_fork = buffer_global_max_distance_left_fork.clone();
+          //   return answer_xy_left_fork;
+          // } else if self.fork_direction == ForkDirection::LEFT {
+            //   self.global_max_distance_proportion_right_fork = buffer_global_max_distance_right_fork.clone();
+            //   return answer_xy_right_fork;
+            // }
+          }else {
+            // self.major_strategy = MajorStrategy::SPEAR;
+          }
+          
+        }
+        
+        
+        // now if strategies did not work, then try to find the default answer
+        
+        
+        append_to_file(DEBUG_FILE, &format!("\n====\nanswer_xy: {} {}", answer_xy[0], answer_xy[1])).expect("cannot write to debug file");
+        answer_xy
       }
       
-    }
-    
-    
-    // now if strategies did not work, then try to find the default answer
-    
-    
-    append_to_file(DEBUG_FILE, &format!("\n====\nanswer_xy: {} {}", answer_xy[0], answer_xy[1])).expect("cannot write to debug file");
-    answer_xy
-  }
-  
-  /** 
-  the piece position is correct if all(except one) non-empty cells of the piece
-  are placed on the empty cells of the field, and only one non-empty cell
-  of the piece is placed on the player cell(any cell covered by the
-    player char by the player piece placement previously)
-    */
-    fn position_is_correct(&self, anfield: &VecDeque<VecDeque<char>>, piece: &VecDeque<VecDeque<char>>, x: usize, y: usize, player:&[char;2]) -> bool {
-      
-      append_to_file(DEBUG_FILE, &format!("\n\n===\ninside position is correct")).expect("cannot write to debug file");
-      // append_to_file(DEBUG_FILE, &format!("anfield {:?}" ,anfield)).expect("cannot write to debug file");
-      append_to_file(DEBUG_FILE, &format!("piece {:?}" ,piece)).expect("cannot write to debug file");
-      append_to_file(DEBUG_FILE, &format!("x {} y {}" ,x,y)).expect("cannot write to debug file");
-      append_to_file(DEBUG_FILE, &format!("player {:?}" ,player)).expect("cannot write to debug file");
-      
-      /*
-      only one cell from the piece must be placed on the player cell, so
-      when the player_cells_hovered_by_piece is 1, for all the piece cells,
-      the position is correct, otherwise it is not
-      */
-      let mut player_cells_hovered_by_piece:usize = 0;
-      
-      /*iterate the piece and compare the cells with the field cells using the x and y incrementation*/
-      for (piece_y, field_y) in (0..piece.len()).zip(y..y + piece.len()) { /*vertical row step */
-        for (piece_x, field_x) in (0..piece[0].len()).zip(x..x+piece[0].len()) {/*column */
-          if piece[piece_y][piece_x] != '.' {/*if the piece cell is not empty*/
-            if anfield[field_y][field_x] != '.' {/*if the field cell is not empty*/
-              /* both cells (anfield, piece) are not empty, so need extra check*/
-              
-              if player_cells_hovered_by_piece > 0{/*if at least one player cell is already hovered by piece*/
-                return false;/*the piece position is not correct*/
+      /** 
+      the piece position is correct if all(except one) non-empty cells of the piece
+      are placed on the empty cells of the field, and only one non-empty cell
+      of the piece is placed on the player cell(any cell covered by the
+        player char by the player piece placement previously)
+        */
+        fn position_is_correct(&self, anfield: &VecDeque<VecDeque<char>>, piece: &VecDeque<VecDeque<char>>, x: usize, y: usize, player:&[char;2]) -> bool {
+          
+          append_to_file(DEBUG_FILE, &format!("\n\n===\ninside position is correct")).expect("cannot write to debug file");
+          // append_to_file(DEBUG_FILE, &format!("anfield {:?}" ,anfield)).expect("cannot write to debug file");
+          append_to_file(DEBUG_FILE, &format!("piece {:?}" ,piece)).expect("cannot write to debug file");
+          append_to_file(DEBUG_FILE, &format!("x {} y {}" ,x,y)).expect("cannot write to debug file");
+          append_to_file(DEBUG_FILE, &format!("player {:?}" ,player)).expect("cannot write to debug file");
+          
+          /*
+          only one cell from the piece must be placed on the player cell, so
+          when the player_cells_hovered_by_piece is 1, for all the piece cells,
+          the position is correct, otherwise it is not
+          */
+          let mut player_cells_hovered_by_piece:usize = 0;
+          
+          /*iterate the piece and compare the cells with the field cells using the x and y incrementation*/
+          for (piece_y, field_y) in (0..piece.len()).zip(y..y + piece.len()) { /*vertical row step */
+            for (piece_x, field_x) in (0..piece[0].len()).zip(x..x+piece[0].len()) {/*column */
+              if piece[piece_y][piece_x] != '.' {/*if the piece cell is not empty*/
+                if anfield[field_y][field_x] != '.' {/*if the field cell is not empty*/
+                  /* both cells (anfield, piece) are not empty, so need extra check*/
+                  
+                  if player_cells_hovered_by_piece > 0{/*if at least one player cell is already hovered by piece*/
+                    return false;/*the piece position is not correct*/
+                  }
+                  
+                  if anfield[field_y][field_x] == player[0] || anfield[field_y][field_x] == player[1] {/*if the field cell is player cell*/
+                    player_cells_hovered_by_piece += 1;/*increment the player cells hovered by piece*/
+                  } else {/*if the field cell is enemy cell*/
+                    return false;/*the piece position is not correct*/
+                  }
+                  
+                }
               }
-              
-              if anfield[field_y][field_x] == player[0] || anfield[field_y][field_x] == player[1] {/*if the field cell is player cell*/
-                player_cells_hovered_by_piece += 1;/*increment the player cells hovered by piece*/
-              } else {/*if the field cell is enemy cell*/
-                return false;/*the piece position is not correct*/
-              }
-              
             }
           }
+          
+          if player_cells_hovered_by_piece == 0 {/*if(finally) no player cell is hovered by piece*/
+            return false;/*the piece position is not correct*/
+          }
+          append_to_file(DEBUG_FILE, "the piece position is correct!!!\n\n").expect("cannot write to debug file");
+          true /*the piece position is correct*/
         }
+        
       }
-      
-      if player_cells_hovered_by_piece == 0 {/*if(finally) no player cell is hovered by piece*/
-        return false;/*the piece position is not correct*/
-      }
-      append_to_file(DEBUG_FILE, "the piece position is correct!!!\n\n").expect("cannot write to debug file");
-      true /*the piece position is correct*/
-    }
-    
-  }
