@@ -37,6 +37,12 @@ impl Parser {
     if self.anfield.len() > self.anfield_size[1] {
       self.state = ParserState::GOT_ANFIELD;
       self.anfield.pop_front();
+      // cut first x4 items for each row
+      for row in &mut self.anfield {
+        for _ in 0..4 {
+          row.pop_front();
+        }
+      }
       append_to_file(DEBUG_FILE, &format!("{:?}",self.anfield)).expect("Unable to write data");
     }
   }

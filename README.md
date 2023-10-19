@@ -1,16 +1,26 @@
 # Task "filler"
+
 Grit:lab Åland Islands 2023
 
-## Run 
--  in /docker_image/ run 
-    `docker run -v "$(pwd)/solution":/filler/solution -it filler`
-- On mac: From the docker terminal run ``./m1_game_engine -f maps/map01 -p1 m1_robots/bender -p2 solution/fillerbot``
+## Run
 
-- On Linux: From the docker terminal run ``./linux_game_engine -f maps/map01 -p1 linux_robots/bender -p2 solution/fillerbot``
+- in /docker_image/ run:
+  `docker build -t filler .`
+  `docker run -v "$(pwd)/solution":/filler/solution -it filler`
+- On mac: From the docker terminal run :
+  `cd solution/filler`
+  `cargo build`
+  `cd ../.. `
+  `cp /filler/solution/filler/target/debug/filler /filler/solution/fillerbot`
+  `./m1_game_engine -f maps/map01 -p1 m1_robots/bender -p2 solution/fillerbot`
+
+( - On Linux: From the docker terminal run `./linux_game_engine -f maps/map01 -p1 linux_robots/bender -p2 solution/fillerbot` )
 
 ## Description
+
 https://github.com/01-edu/public/tree/master/subjects/filler
 
 ## Authors
+
 - [healingdrawing](https://healingdrawing.github.io)
 - [blueskiy01](https://github.com/blueskiy01)

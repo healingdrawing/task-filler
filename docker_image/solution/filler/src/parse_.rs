@@ -16,6 +16,7 @@ pub enum ParserState {
 pub struct Parser {
   pub state: ParserState,
   pub player_char: [char; 2],
+  pub enemy_char: [char; 2],
   pub anfield_size: [usize; 2],
   pub anfield: VecDeque<VecDeque<char>>,
   pub piece_size: [usize; 2],
@@ -27,6 +28,7 @@ impl Parser {
     Parser {
       state: ParserState::WAITING,
       player_char: ['\0', '\0'],
+      enemy_char: ['\0', '\0'],
       anfield_size: [0, 0],
       anfield: VecDeque::new(),
       piece_size: [0, 0],
@@ -48,7 +50,7 @@ impl Parser {
 
   pub fn reset(&mut self){
     self.state = ParserState::GOT_PLAYER; //skip waiting, it is fired only once
-    self.player_char = ['\0', '\0'];
+    // self.player_char = ['\0', '\0'];
     self.anfield_size = [0, 0];
     self.anfield = VecDeque::new();
     self.piece_size = [0, 0];
