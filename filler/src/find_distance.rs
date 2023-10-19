@@ -96,7 +96,7 @@ impl Finder {
   }
 
   /**find the most agressive distance of piece cell on compas way */
-  pub fn find_most_agressive_distnace_of_piece_cell(
+  pub fn find_most_agressive_distance_of_piece_cell(
     &mut self,
     piece: &VecDeque<VecDeque<char>>,
     piece_left_top_cell_xy:[usize;2],
@@ -134,7 +134,7 @@ impl Finder {
   }
 
   /**find the most agressive distance of piece cell on on compas way */
-  pub fn find_most_agressive_distnace_proportion_of_piece_cell(
+  pub fn find_most_agressive_distance_proportion_of_piece_cell(
     &mut self,
     piece: &VecDeque<VecDeque<char>>,
     piece_left_top_cell_xy:[usize;2],

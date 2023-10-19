@@ -15,6 +15,12 @@ pub enum Compas {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq)]
+pub enum ForkDirection{
+  LEFT,
+  RIGHT,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub enum MajorStrategy {
   SPEAR, // the first stage, when try to prevent enemy from moving to player side
   FORK, // the second stage, when try to cut the enemy way to half sides angle 45 +-
@@ -46,6 +52,9 @@ pub struct Finder {
    * it is a distance divided by the maximum distance of the field in the direction
    * */
   pub global_max_distance_proportion_right_fork: f64,
+
+  /**to try to switch left right left right */
+  pub fork_direction: ForkDirection,
   
   /**major direction to enemy in the beginning*/
   pub major: Compas,
@@ -71,11 +80,12 @@ impl Finder {
   pub fn new() -> Finder {
     Finder {
       fresh: true,
-      major_strategy: MajorStrategy::SPEAR,
+      major_strategy: MajorStrategy::FORK,
       global_min_distance_between_most_agressive_cells: f64::MAX,
       
       global_max_distance_proportion_left_fork: f64::MIN,
       global_max_distance_proportion_right_fork: f64::MIN,
+      fork_direction: ForkDirection::LEFT,
 
       major: Compas::CENTRAL,
       major_fork_left: Compas::CENTRAL,

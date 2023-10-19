@@ -1,4 +1,4 @@
-use crate::find_::{Finder, Compas};
+use crate::find_::{Finder, Compas, ForkDirection};
 
 impl Finder {
   /** todo check it. the major direction in the first step moment */
@@ -23,6 +23,13 @@ impl Finder {
     else if angle >= 247.5 && angle < 292.5 { Compas::S } 
     else { Compas::SE };
     direction
+  }
+
+  pub fn switch_fork_direction(&mut self) {
+    match self.fork_direction {
+      ForkDirection::LEFT => self.fork_direction = ForkDirection::RIGHT,
+      ForkDirection::RIGHT => self.fork_direction = ForkDirection::LEFT,
+    }
   }
 
   /** find left direction close to 45 degrees angle relative to incoming */

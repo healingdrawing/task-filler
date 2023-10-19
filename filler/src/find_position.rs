@@ -126,6 +126,8 @@ impl Finder {
     
     // todo: in some reasons it always worse than without fork strategy
     if self.major_strategy == MajorStrategy::FORK {/*agressively invade to fork sides */
+      self.switch_fork_direction();
+      
       let mut fork_strategy_still_effective = false; /*false - no more ways to increase the progress to fork directions*/
       
       /* use buffers to rollback finally not used variant
@@ -152,30 +154,30 @@ impl Finder {
               answer_xy_right_fork = [x, y].clone();
             }
             
-            let max_distance_proportion_left_fork =
-            self.find_most_agressive_distnace_proportion_of_piece_cell(
+            let max_distance_left_fork =
+            self.find_most_agressive_distance_of_piece_cell(
               piece,
               [x,y].clone(),
               self.major_fork_left.clone(),
               &anfield_size_xy.clone()
             );
             
-            let max_distance_proportion_right_fork =
-            self.find_most_agressive_distnace_proportion_of_piece_cell(
+            let max_distance_right_fork =
+            self.find_most_agressive_distance_of_piece_cell(
               piece,
               [x,y].clone(),
               self.major_fork_right.clone(),
               &anfield_size_xy.clone()
             );
             
-            if max_distance_proportion_left_fork > buffer_global_max_distance_left_fork{
-              buffer_global_max_distance_left_fork = max_distance_proportion_left_fork.clone();
+            if max_distance_left_fork > buffer_global_max_distance_left_fork{
+              buffer_global_max_distance_left_fork = max_distance_left_fork.clone();
               fork_strategy_still_effective = true;
               answer_xy_left_fork = [x, y].clone();
             }
             
-            if max_distance_proportion_right_fork > buffer_global_max_distance_right_fork{
-              buffer_global_max_distance_right_fork = max_distance_proportion_right_fork.clone();
+            if max_distance_right_fork > buffer_global_max_distance_right_fork{
+              buffer_global_max_distance_right_fork = max_distance_right_fork.clone();
               fork_strategy_still_effective = true;
               answer_xy_right_fork = [x, y].clone();
             }
@@ -186,7 +188,7 @@ impl Finder {
       
       if fork_strategy_still_effective
       {
-        if buffer_global_max_distance_left_fork > buffer_global_max_distance_right_fork
+        if buffer_global_max_distance_left_fork < buffer_global_max_distance_right_fork
         {
           self.global_max_distance_proportion_left_fork = buffer_global_max_distance_left_fork.clone();
           return answer_xy_left_fork;
@@ -194,9 +196,10 @@ impl Finder {
           self.global_max_distance_proportion_right_fork = buffer_global_max_distance_right_fork.clone();
           return answer_xy_right_fork;
         }
+      }else {
+        self.major_strategy = MajorStrategy::SPEAR;
       }
       
-      self.major_strategy = MajorStrategy::SPEAR;
     }
     
     
