@@ -5,7 +5,7 @@ impl Finder {
    * find the most agressive position of the target (player or enemy)
    * 
    */
-  pub fn find_agressive(&mut self, parser: &&mut Parser, target_char:&[char;2], direction_to_target:Compas)-> [usize;2] {
+  pub fn find_most_agressive_xy(&mut self, parser: &&mut Parser, target_char:&[char;2], direction_to_target:Compas)-> [usize;2] {
     let anfield = &parser.anfield;
     let mut target_xy = [anfield[0].len()-1, anfield.len()-1];
     

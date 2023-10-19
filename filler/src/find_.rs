@@ -14,12 +14,30 @@ pub enum Compas {
   CENTRAL, // no direction
 }
 
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum MajorStrategy {
+  SPEAR, // the first stage, when try to prevent enemy from moving to player side
+  FORK, // the second stage, when try to cut the enemy way to half sides angle 45 +-
+  CROSS, // the third stage, when try to cut the enemy way to sides angle 90 +-
+}
+
 #[derive(Debug)]
 pub struct Finder {
   /**first step used to determine major direction*/
   pub fresh: bool,
+  /**major strategy */
+  pub major_strategy: MajorStrategy,
+  /**
+   * global minimal distance from most agressive player and enemy cells
+   * when it stops decreasing then it is time to change the strategy from SPEAR to FORK
+   * */
+  pub global_min_distance_between_most_agressive_cells: f64,
   /**major direction to enemy in the beginning*/
   pub major: Compas,
+  /**major relative half left direction for fork strategy, let is say 45 degrees+- from major to left */
+  pub major_fork_left: Compas,
+  /**major relative half right direction for fork strategy, let is say 45 degrees+- from major to right */
+  pub major_fork_right: Compas,
   /**major relative left direction */
   pub major_left: Compas,
   /**major relative right direction */
@@ -28,8 +46,6 @@ pub struct Finder {
   pub minor: Compas,
   /**for move answer*/
   pub answer_xy: [usize; 2],
-  /**for surrender answer*/
-  pub enemy_xy: [usize; 2],
   /**for potential implementation of more compact placement(not agressive) */
   pub player_xy: [usize; 2],
   /**for first step*/
@@ -40,12 +56,15 @@ impl Finder {
   pub fn new() -> Finder {
     Finder {
       fresh: true,
+      major_strategy: MajorStrategy::SPEAR,
+      global_min_distance_between_most_agressive_cells: f64::MAX,
       major: Compas::CENTRAL,
+      major_fork_left: Compas::CENTRAL,
+      major_fork_right: Compas::CENTRAL,
       major_left: Compas::CENTRAL,
       major_right: Compas::CENTRAL,
       minor: Compas::CENTRAL,
       answer_xy: [usize::MAX, usize::MAX],
-      enemy_xy: [usize::MAX, usize::MAX],
       player_xy: [usize::MAX, usize::MAX],
       first_answer: true,
     }
@@ -63,16 +82,6 @@ impl Finder {
   }
   
   pub fn find_answer(&mut self, parser: &mut Parser) {
-    let anfield = &parser.anfield;
-    let piece = &parser.piece;
-    let player = &parser.player_char;
-    
-    // todo: implement find solution here
-    //first clean the raw data of the field, find solution and write it to self.answer
-    
-    // clean the data
-    // build the 2d array field (row,column)yx = Vec<Vec<char>> , to represent the field
-    
     if self.fresh{
       self.fresh = false;
       // find the player position
@@ -82,9 +91,10 @@ impl Finder {
       if player_xy == [usize::MAX, usize::MAX] { self.answer_xy = player_xy; return; }
       // find the enemy position(the most far enemy cell) and save coordinates as surrender answer
       let enemy_xy = self.find_enemy(parser, player_xy);
-      self.enemy_xy = enemy_xy;
       // todo: find the enemy direction N(-y) S(+y) W(-x) E(+x), x8 directions using enum,
       self.major = self.find_direction(player_xy, enemy_xy);
+      self.major_fork_left = self.find_fork_left_direction(self.major);
+      self.major_fork_right = self.find_fork_right_direction(self.major);
       self.major_left = self.find_left_direction(self.major);
       self.major_right = self.find_right_direction(self.major);
       
@@ -92,11 +102,12 @@ impl Finder {
     }
     
     /*
-    [only the first step]
+    above [only the first step]
     find the player position
     find the enemy position(the most far enemy cell) and save coordinates as surrender answer
     find the enemy direction N(-y) S(+y) W(-x) E(+x), x8 directions using enum,
     that is the new piece major direction and save it into finder.
+    
     Later it can be used as way
     to find the enemy cells which are directed to the player side
     and moved already as possible deep in player direction,
