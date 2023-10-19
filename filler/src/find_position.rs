@@ -215,7 +215,8 @@ impl Finder {
     */
     fn position_is_correct(&self, anfield: &VecDeque<VecDeque<char>>, piece: &VecDeque<VecDeque<char>>, x: usize, y: usize, player:&[char;2]) -> bool {
       
-      append_to_file(DEBUG_FILE, &format!("inside ===\nanfield {:?}" ,anfield)).expect("cannot write to debug file");
+      append_to_file(DEBUG_FILE, &format!("\n\n===\ninside position is correct")).expect("cannot write to debug file");
+      // append_to_file(DEBUG_FILE, &format!("anfield {:?}" ,anfield)).expect("cannot write to debug file");
       append_to_file(DEBUG_FILE, &format!("piece {:?}" ,piece)).expect("cannot write to debug file");
       append_to_file(DEBUG_FILE, &format!("x {} y {}" ,x,y)).expect("cannot write to debug file");
       append_to_file(DEBUG_FILE, &format!("player {:?}" ,player)).expect("cannot write to debug file");
@@ -252,7 +253,7 @@ impl Finder {
       if player_cells_hovered_by_piece == 0 {/*if(finally) no player cell is hovered by piece*/
         return false;/*the piece position is not correct*/
       }
-      
+      append_to_file(DEBUG_FILE, "the piece position is correct!!!\n\n").expect("cannot write to debug file");
       true /*the piece position is correct*/
     }
     

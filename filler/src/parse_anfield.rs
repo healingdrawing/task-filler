@@ -18,7 +18,7 @@ impl Parser {
         self.anfield_size = [size1, size2];
         
         // Print the array
-        append_to_file(DEBUG_FILE, &format!("{:?}",self.anfield_size)).expect("Unable to write data");
+        // append_to_file(DEBUG_FILE, &format!("{:?}",self.anfield_size)).expect("Unable to write data");
       } else {
         println!("Failed to parse sizes");
       }
@@ -43,7 +43,7 @@ impl Parser {
           row.pop_front();
         }
       }
-      append_to_file(DEBUG_FILE, &format!("{:?}",self.anfield)).expect("Unable to write data");
+      // append_to_file(DEBUG_FILE, &format!("{:?}",self.anfield)).expect("Unable to write data");
     }
   }
   

@@ -4,7 +4,7 @@ pub const DEBUG: bool = false; //set to false to disable debug.txt stuff
 
 pub const DEBUG_FILE: &str = "debug.txt";
 
-pub fn recreate_file(file_path: &str) -> io::Result<()> {
+pub fn try_recreate_file_according_to_value_of_debug_boolean(file_path: &str) -> io::Result<()> {
   if DEBUG {
     File::create(file_path)?;
   } 

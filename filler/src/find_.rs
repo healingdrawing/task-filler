@@ -100,14 +100,17 @@ impl Finder {
     }
   }
   
-  pub fn find_answer(&mut self, parser: &mut Parser) {
+  pub fn find_answer(&mut self, parser: &mut Parser) -> [usize; 2] {
     if self.fresh{
       self.fresh = false;
       // find the player position
       let player_xy = self.find_player(parser);
       self.player_xy = player_xy;
       // if player not found then surrender
-      if player_xy == [usize::MAX, usize::MAX] { self.answer_xy = player_xy; return; }
+      if player_xy == [usize::MAX, usize::MAX] {
+        self.answer_xy = player_xy;
+        return player_xy;
+      }
       // find the enemy position(the most far enemy cell) and save coordinates as surrender answer
       let enemy_xy = self.find_enemy(parser, player_xy);
       // todo: find the enemy direction N(-y) S(+y) W(-x) E(+x), x8 directions using enum,
@@ -124,6 +127,8 @@ impl Finder {
     
     //clean parser
     parser.reset();
+
+    return self.answer_xy.clone();
     
   }
   

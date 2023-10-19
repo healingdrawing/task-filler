@@ -14,13 +14,13 @@ mod find_diagonal;
 mod find_more_agressive;
 mod find_most_far;
 
-use debug::{append_to_file, recreate_file, DEBUG_FILE};
+use debug::{append_to_file, try_recreate_file_according_to_value_of_debug_boolean, DEBUG_FILE};
 use std::io::{self};
 
 use crate::parse_::ParserState;
 
 fn main() {
-  recreate_file(DEBUG_FILE).expect("Unable to create file");
+  try_recreate_file_according_to_value_of_debug_boolean(DEBUG_FILE).expect("Unable to create file");
   
   let mut parser = parse_::Parser::new();
   let mut finder = find_::Finder::new();
@@ -41,8 +41,9 @@ fn main() {
 
         match parser.state {
           ParserState::GOT_PIECE => {
-            finder.find_answer(&mut parser);
-            println!("{}", finder.answer());
+            let rust_crap_answer = finder.find_answer(&mut parser);
+            println!("{} {}", rust_crap_answer[0], rust_crap_answer[1]);
+            // println!("{}", finder.answer());
           },
           _ => (),
         }
