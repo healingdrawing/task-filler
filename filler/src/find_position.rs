@@ -33,15 +33,12 @@ impl Finder {
     self.piece_negative_xy = parser.piece_negative_xy.clone();
     
     let player_char = &parser.player_char.clone();
-    let enemy_char = &parser.enemy_char.clone();
     
     /* for more agressive piece cell check */
     let anfield_size_xy = [anfield[0].len(), anfield.len()];
     
     /* the piece top left corner position */
     let mut answer_xy = [i128::MIN, i128::MIN];
-    /* the most argessive enemy cell position */
-    
     
     //todo: implement.
     /* to default values for correct piece position */
@@ -124,6 +121,7 @@ impl Finder {
       
     }
     */
+    
     if self.major_strategy == MajorStrategy::FORK {/*agressively invade to fork sides */
       self.switch_fork_direction();
       
@@ -222,6 +220,7 @@ impl Finder {
         }
         
         
+
         //todo old solution before separate left and right forks
         
         // if buffer_global_max_distance_left_fork < buffer_global_max_distance_right_fork

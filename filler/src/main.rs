@@ -15,7 +15,6 @@ mod find_more_agressive;
 mod find_most_far;
 
 use debug::{append_to_file, try_recreate_file_according_to_value_of_debug_boolean, DEBUG_FILE};
-use core::time;
 use std::{io::{self}, thread, time::Duration};
 
 use crate::parse_::ParserState;
