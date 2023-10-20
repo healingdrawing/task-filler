@@ -25,11 +25,41 @@ impl Finder {
     direction
   }
 
-  pub fn switch_fork_direction(&mut self) {
-    match self.fork_direction {
-      ForkDirection::LEFT => self.fork_direction = ForkDirection::RIGHT,
-      ForkDirection::RIGHT => self.fork_direction = ForkDirection::LEFT,
+  /** major is longest distance to prefer to be managed first */
+  pub fn find_major_and_minor_fork_direction_from_xy(
+    &mut self,
+    fork_left_direction:Compas,
+    fork_right_direction:Compas,
+    player_xy:[usize;2],
+    anfield_size_xy:&[usize;2],
+  )-> [ForkDirection;2] {
+    
+    let most_far_left_fork_xy = self.find_most_far_xy_of_direction(
+      anfield_size_xy,
+      fork_left_direction,
+    );
+
+    let most_far_right_fork_xy = self.find_most_far_xy_of_direction(
+      anfield_size_xy,
+      fork_right_direction,
+    );
+
+    let left_fork_distance = self.find_distance(
+      player_xy,
+      most_far_left_fork_xy,
+    );
+
+    let right_fork_distance = self.find_distance(
+      player_xy,
+      most_far_right_fork_xy,
+    );
+
+    if right_fork_distance > left_fork_distance {
+      [ForkDirection::RIGHT, ForkDirection::LEFT]
+    } else {
+      [ForkDirection::LEFT, ForkDirection::RIGHT]
     }
+
   }
 
   /** find left direction close to 45 degrees angle relative to incoming */

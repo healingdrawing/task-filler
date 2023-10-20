@@ -44,17 +44,18 @@ pub struct Finder {
    * if new piece distance not greater than previous than check the fork_right_strategy
    * it is a distance divided by the maximum distance of the field in the direction
    * */
-  pub global_max_distance_proportion_left_fork: f64,
+  pub global_max_distance_proportion_major_fork: f64,
   
   /**global max distance aimed to major_fork_right
    * used to check if the fork_right_strategy is still actual
    * if new piece distance not greater than previous than check the fork_left_strategy
    * it is a distance divided by the maximum distance of the field in the direction
    * */
-  pub global_max_distance_proportion_right_fork: f64,
+  pub global_max_distance_proportion_minor_fork: f64,
 
-  /**to try to switch left right left right */
-  pub fork_direction: ForkDirection,
+  /**fork direction used to manage strategy*/
+  pub major_fork_direction: ForkDirection,
+  pub minor_fork_direction: ForkDirection,
   
   /**major direction to enemy in the beginning*/
   pub major: Compas,
@@ -85,9 +86,10 @@ impl Finder {
       major_strategy: MajorStrategy::FORK,
       global_min_distance_between_most_agressive_cells: f64::MAX,
       
-      global_max_distance_proportion_left_fork: f64::MIN,
-      global_max_distance_proportion_right_fork: f64::MIN,
-      fork_direction: ForkDirection::LEFT,
+      global_max_distance_proportion_major_fork: f64::MIN,
+      global_max_distance_proportion_minor_fork: f64::MIN,
+      major_fork_direction: ForkDirection::LEFT,
+      minor_fork_direction: ForkDirection::RIGHT,
 
       major: Compas::CENTRAL,
       major_fork_left: Compas::CENTRAL,
@@ -134,6 +136,15 @@ impl Finder {
       self.major_right = self.find_right_direction(self.major.clone());// artefact
       
       self.minor = self.find_opposite_direction(self.major.clone());
+
+      [self.major_fork_direction, self.minor_fork_direction]
+      = self.find_major_and_minor_fork_direction_from_xy(
+        self.major_fork_left.clone(),
+        self.major_fork_right.clone(),
+        self.player_xy.clone(),
+        &parser.anfield_size.clone(),
+      )
+
     }
     
     self.answer_xy = self.find_position(parser);

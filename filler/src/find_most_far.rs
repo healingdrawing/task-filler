@@ -19,4 +19,13 @@ impl Finder{
       Compas::CENTRAL => {[usize::MAX, usize::MAX]}, /* should never fire */
     }
   }
+
+  pub fn find_most_far_xy_of_direction(
+    &mut self,
+    anfield_size_xy:&[usize;2],
+    direction:Compas,
+  ) -> [usize;2] {
+    let opposite = self.find_opposite_direction(direction);
+    self.find_most_far_xy_opposite_the_direction(anfield_size_xy, opposite)
+  }
 }
