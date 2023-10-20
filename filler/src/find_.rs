@@ -69,13 +69,13 @@ pub struct Finder {
   /**minor direction, opposite to major */
   pub minor: Compas,
   /**for move answer*/
-  pub answer_xy: [usize; 2],
+  pub answer_xy: [i128; 2],
   /**for potential implementation of more compact placement(not agressive) */
   pub player_xy: [usize; 2],
   /**for first step*/
   pub first_answer: bool,
   /** try to implement negative indices for the piece position on the anfield */
-  pub negative_xy: [usize; 2],
+  pub piece_negative_xy: [usize; 2],
 }
 
 impl Finder {
@@ -95,10 +95,10 @@ impl Finder {
       major_left: Compas::CENTRAL,
       major_right: Compas::CENTRAL,
       minor: Compas::CENTRAL,
-      answer_xy: [usize::MIN, usize::MIN],
+      answer_xy: [i128::MIN, i128::MIN],
       player_xy: [usize::MIN, usize::MIN],
       first_answer: true,
-      negative_xy: [usize::MIN, usize::MIN],
+      piece_negative_xy: [usize::MIN, usize::MIN],
     }
   }
   
@@ -113,7 +113,7 @@ impl Finder {
     }
   }
   
-  pub fn find_answer(&mut self, parser: &mut Parser) -> [usize; 2] {
+  pub fn find_answer(&mut self, parser: &mut Parser) -> [i128; 2] {
     if self.fresh{
       self.fresh = false;
       // find the player position
@@ -121,8 +121,8 @@ impl Finder {
       self.player_xy = player_xy.clone();
       // if player not found then surrender
       if player_xy == [usize::MAX, usize::MAX] {
-        self.answer_xy = player_xy.clone();
-        return player_xy.clone();
+        self.answer_xy = [player_xy[0] as i128, player_xy[1] as i128];
+        return [player_xy [0] as i128, player_xy [1] as i128];
       }
       // find the enemy position(the most far enemy cell) and save coordinates as surrender answer
       let enemy_xy = self.find_enemy(parser, player_xy.clone());

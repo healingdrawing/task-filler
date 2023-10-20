@@ -6,7 +6,7 @@ rm debug.txt
 
 # ./linux_game_engine -f maps/map01 -p2 linux_robots/bender -p1 solution/filler
 
-./linux_game_engine -f maps/map06 -p1 linux_robots/bender -p2 solution/filler
+./linux_game_engine -f maps/map02 -p1 linux_robots/bender -p2 solution/filler
 
 # audit quesions
 

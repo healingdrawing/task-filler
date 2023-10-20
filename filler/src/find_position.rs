@@ -27,9 +27,11 @@ impl Finder {
   *
   * otherwise return the surrender answer (the most far enemy position)
   */
-  pub fn find_position(&mut self, parser: &mut Parser) -> [usize;2] {
+  pub fn find_position(&mut self, parser: &mut Parser) -> [i128;2] {
     let anfield = &parser.anfield;
     let piece = &parser.piece;
+    self.piece_negative_xy = parser.piece_negative_xy.clone();
+    
     let player_char = &parser.player_char.clone();
     let enemy_char = &parser.enemy_char.clone();
     
@@ -37,7 +39,7 @@ impl Finder {
     let anfield_size_xy = [anfield[0].len(), anfield.len()];
     
     /* the piece top left corner position */
-    let mut answer_xy = [usize::MIN, usize::MIN];
+    let mut answer_xy = [i128::MIN, i128::MIN];
     /* the most argessive enemy cell position */
     
     
@@ -45,27 +47,40 @@ impl Finder {
     /* to default values for correct piece position */
     let mut fresh_calculation:bool = true;
     
-    let piece_height = piece.len();
-    let piece_width = piece[0].len();
+    let piece_height = piece.len() as i128;
+    let piece_width = piece[0].len() as i128;
+
+    append_to_file(DEBUG_FILE, &format!("\n\n===\ninside find_position piece_height {} piece_width {}", piece_height,piece_width)).expect("cannot write to debug file");
     
     /* prepare iterators depend on self.major direction */
     let y_iterator = match self.major {
       Compas::NE | Compas::N | Compas::NW | Compas::W | Compas::CENTRAL =>
-      (0..anfield.len() - piece_height + 1).rev().collect::<Vec<_>>().into_iter(),
+      (0-self.piece_negative_xy[1] as i128 .. anfield.len() as i128
+       - (piece_height+ self.piece_negative_xy[1] as i128) + 1 )
+      .rev()
+      .collect::<Vec<_>>().into_iter(),
       
       Compas::SW | Compas::S | Compas::SE | Compas::E =>
-      (0..anfield.len() - piece_height + 1).collect::<Vec<_>>().into_iter(),
+      (0-self.piece_negative_xy[1] as i128 .. anfield.len() as i128
+       - (piece_height + self.piece_negative_xy[1] as i128) + 1 )
+      .collect::<Vec<_>>().into_iter(),
     };
     
     let x_iterator = match self.major {
       Compas::NW | Compas::W | Compas::SW | Compas::S =>
-      (0..anfield[0].len() - piece_width + 1).rev().collect::<Vec<_>>().into_iter(),
+      (0-self.piece_negative_xy[0] as i128 .. anfield[0].len() as i128
+       - (piece_width + self.piece_negative_xy[0] as i128) + 1 )
+      .rev()
+      .collect::<Vec<_>>().into_iter(),
       
       Compas::SE | Compas::E | Compas::NE | Compas::N | Compas::CENTRAL =>
-      (0..anfield[0].len() - piece_width + 1).collect::<Vec<_>>().into_iter(),
+      (0-self.piece_negative_xy[0] as i128 .. anfield[0].len() as i128
+       - (piece_width + self.piece_negative_xy[0] as i128) + 1 )
+      .collect::<Vec<_>>().into_iter(),
     };
     
     //todo: SPEAR does not used at the moment, because less effective finally, fail lot of cases on the audit question
+    /*
     if self.major_strategy == MajorStrategy::SPEAR {/*agressively invade face direction */
       let mut spear_strategy_still_effective = false; /*false - no more ways to decrease distance from piece to most enemy agressive cell*/
       for y in y_iterator.clone() {
@@ -108,7 +123,7 @@ impl Finder {
       }
       
     }
-    
+    */
     if self.major_strategy == MajorStrategy::FORK {/*agressively invade to fork sides */
       self.switch_fork_direction();
       
@@ -238,62 +253,49 @@ impl Finder {
       of the piece is placed on the player cell(any cell covered by the
         player char by the player piece placement previously)
         */
-        fn position_is_correct(&mut self, anfield: &VecDeque<VecDeque<char>>, piece: &VecDeque<VecDeque<char>>, x: usize, y: usize, player:&[char;2]) -> bool {
+        fn position_is_correct(
+          &mut self,
+          anfield: &VecDeque<VecDeque<char>>,
+          piece: &VecDeque<VecDeque<char>>,
+          x: i128, y: i128, player:&[char;2]
+        ) -> bool {
           
           append_to_file(DEBUG_FILE, &format!("\n\n===\ninside position is correct")).expect("cannot write to debug file");
           // append_to_file(DEBUG_FILE, &format!("anfield {:?}" ,anfield)).expect("cannot write to debug file");
           append_to_file(DEBUG_FILE, &format!("piece {:?}" ,piece)).expect("cannot write to debug file");
           append_to_file(DEBUG_FILE, &format!("x {} y {}" ,x,y)).expect("cannot write to debug file");
+          append_to_file(DEBUG_FILE, &format!("neg_x {} neg_y {}" ,self.piece_negative_xy[0],self.piece_negative_xy[1])).expect("cannot write to debug file");
+          
+          
           append_to_file(DEBUG_FILE, &format!("player {:?}" ,player)).expect("cannot write to debug file");
-
-          /*try to clone piece, then cut the empty rows and columns at the beginning ,
-          and save negative increment for piece indices on the anfield.
-          After that when result shaped subtract indices from the final result answer */
-
-          /*clone the piece*/
-          let mut piece_clone = piece.clone();
-
-          /*cut empty rows and columns from the beginning and collect the negative indices*/
-          let mut negative_x = usize::MIN;
-          let mut negative_y = usize::MIN;
-          while piece_clone.front().unwrap().iter().all(|&x| x == '.') {
-            piece_clone.pop_front();
-            negative_y += 1;
-          }
-          while piece_clone.iter().all(|row| row.front().unwrap() == &'.') {
-            for row in &mut piece_clone {
-              row.pop_front();
-            }
-            negative_x += 1;
-          }
-
-          self.negative_xy = [negative_x, negative_y];
           
           /*
           only one cell from the piece must be placed on the player cell, so
           when the player_cells_hovered_by_piece is 1, for all the piece cells,
           the position is correct, otherwise it is not
           */
-          let mut player_cells_hovered_by_piece:usize = 0;
-
-          let zip_y = (y as i128) - (negative_y as i128);//todo: wtf, crap, usize can not be negative, need refactoring
+          let mut player_cells_hovered_by_piece:i128 = 0;
           
+          /*manage negative indices */
+          let zip_y = (y + self.piece_negative_xy[1] as i128) as usize;
+          let zip_x = (x + self.piece_negative_xy[0] as i128) as usize;
+          
+          append_to_file(DEBUG_FILE, &format!("zip_x {} zip_y {}" ,zip_x,zip_y)).expect("cannot write to debug file");
+
           /*iterate the piece and compare the cells with the field cells using the x and y incrementation*/
-          for (piece_y, field_y) in (0..piece_clone.len()).zip(y..y + piece_clone.len()) { /*vertical row step */
-            for (piece_x, field_x) in (0..piece_clone[0].len()).zip(x..x+piece_clone[0].len()) {/*column */
-              if piece_clone[piece_y][piece_x] != '.' {/*if the piece cell is not empty*/
+          for (piece_y, field_y) in (0..piece.len()).zip(zip_y..zip_y + piece.len()) { /*vertical row step */
+            for (piece_x, field_x) in (0..piece[0].len()).zip(zip_x..zip_x+piece[0].len()) {/*column */
+              if piece[piece_y][piece_x] != '.' {/*if the piece cell is not empty*/
                 if anfield[field_y][field_x] != '.' {/*if the field cell is not empty*/
                   /* both cells (anfield, piece) are not empty, so need extra check*/
                   
                   if player_cells_hovered_by_piece > 0{/*if at least one player cell is already hovered by piece*/
-                    self.reset_negative_xy();
                     return false;/*the piece position is not correct*/
                   }
                   
                   if anfield[field_y][field_x] == player[0] || anfield[field_y][field_x] == player[1] {/*if the field cell is player cell*/
                     player_cells_hovered_by_piece += 1;/*increment the player cells hovered by piece*/
                   } else {/*if the field cell is enemy cell*/
-                    self.reset_negative_xy();
                     return false;/*the piece position is not correct*/
                   }
                   
@@ -302,16 +304,15 @@ impl Finder {
             }
           }
           
-          if player_cells_hovered_by_piece != 1 {/*if(finally) no player cell is hovered by piece*/
-            self.reset_negative_xy();
+          if player_cells_hovered_by_piece == 0 {/*if(finally) no player cell is hovered by piece*/
             return false;/*the piece position is not correct*/
           }
           append_to_file(DEBUG_FILE, "the piece position is correct!!!\n\n").expect("cannot write to debug file");
           true /*the piece position is correct*/
         }
-
+        
         pub fn reset_negative_xy(&mut self){
-          self.negative_xy = [usize::MIN, usize::MIN];
+          self.piece_negative_xy = [usize::MIN, usize::MIN];
         }
         
       }

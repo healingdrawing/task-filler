@@ -99,7 +99,7 @@ impl Finder {
   pub fn find_most_agressive_distance_of_piece_cell(
     &mut self,
     piece: &VecDeque<VecDeque<char>>,
-    piece_left_top_cell_xy:[usize;2],
+    piece_left_top_cell_xy:[i128;2],
     direction:Compas,
     anfield_size:&[usize;2],
   )-> f64 {
@@ -115,12 +115,12 @@ impl Finder {
       for (piece_x, piece_cell) in piece_row.iter().enumerate() {
         /* if the cell is not empty */
         if *piece_cell != '.' {
-          let x = piece_x+xy[0];
-          let y = piece_y+xy[1];
+          let x = piece_x as i128 +xy[0];
+          let y = piece_y as i128 +xy[1];
           /*from far point to piece cell */
           let piece_distance = self.find_distance(
             far_xy,
-            [x,y]
+            [x as usize,y as usize]
           );
           
           if piece_distance > distance {
