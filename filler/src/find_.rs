@@ -118,25 +118,25 @@ impl Finder {
       self.fresh = false;
       // find the player position
       let player_xy = self.find_player(parser);
-      self.player_xy = player_xy;
+      self.player_xy = player_xy.clone();
       // if player not found then surrender
       if player_xy == [usize::MAX, usize::MAX] {
-        self.answer_xy = player_xy;
-        return player_xy;
+        self.answer_xy = player_xy.clone();
+        return player_xy.clone();
       }
       // find the enemy position(the most far enemy cell) and save coordinates as surrender answer
-      let enemy_xy = self.find_enemy(parser, player_xy);
+      let enemy_xy = self.find_enemy(parser, player_xy.clone());
       // todo: find the enemy direction N(-y) S(+y) W(-x) E(+x), x8 directions using enum,
-      self.major = self.find_direction(player_xy, enemy_xy);
-      self.major_fork_left = self.find_fork_left_direction(self.major);
-      self.major_fork_right = self.find_fork_right_direction(self.major);
-      self.major_left = self.find_left_direction(self.major);// artefact
-      self.major_right = self.find_right_direction(self.major);// artefact
+      self.major = self.find_direction(player_xy.clone(), enemy_xy.clone());
+      self.major_fork_left = self.find_fork_left_direction(self.major.clone());
+      self.major_fork_right = self.find_fork_right_direction(self.major.clone());
+      self.major_left = self.find_left_direction(self.major.clone());// artefact
+      self.major_right = self.find_right_direction(self.major.clone());// artefact
       
-      self.minor = self.find_opposite_direction(self.major);
+      self.minor = self.find_opposite_direction(self.major.clone());
     }
     
-    self.answer_xy = self.find_position(parser); //todo: implement. it is raw
+    self.answer_xy = self.find_position(parser);
     
     //clean parser
     parser.reset();

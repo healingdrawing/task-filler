@@ -44,7 +44,13 @@ fn main() {
             let rust_crap_answer = finder.find_answer(&mut parser);
             let crap_x = rust_crap_answer[0] as i128 - finder.negative_xy[0] as i128;
             let crap_y = rust_crap_answer[1] as i128 - finder.negative_xy[1] as i128;
-            println!("{} {}", crap_x, crap_y);
+            println!("{} {}\n negative_x -{} negative_y -{}",
+              crap_x,
+              crap_y,
+              finder.negative_xy[0],
+              finder.negative_xy[1],
+            );
+            finder.reset_negative_xy();
             // println!("{}", finder.answer());
           },
           _ => (),

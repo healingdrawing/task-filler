@@ -30,8 +30,8 @@ impl Finder {
   pub fn find_position(&mut self, parser: &mut Parser) -> [usize;2] {
     let anfield = &parser.anfield;
     let piece = &parser.piece;
-    let player_char = &parser.player_char;
-    let enemy_char = &parser.enemy_char;
+    let player_char = &parser.player_char.clone();
+    let enemy_char = &parser.enemy_char.clone();
     
     /* for more agressive piece cell check */
     let anfield_size_xy = [anfield[0].len(), anfield.len()];
@@ -78,7 +78,7 @@ impl Finder {
             }
             
             /* the most argessive enemy cell position */
-            let most_agressive_enemy_xy = self.find_most_agressive_xy(&parser, enemy_char, self.minor);
+            let most_agressive_enemy_xy = self.find_most_agressive_xy(&parser, enemy_char, self.minor.clone());
             
             let min_distance_from_piece_to_most_agressive_enemy_xy =
             self.find_piece_cell_min_distance_to_cell_xy(
@@ -251,17 +251,17 @@ impl Finder {
           After that when result shaped subtract indices from the final result answer */
 
           /*clone the piece*/
-          let mut piece = piece.clone();
+          let mut piece_clone = piece.clone();
 
           /*cut empty rows and columns from the beginning and collect the negative indices*/
           let mut negative_x = usize::MIN;
           let mut negative_y = usize::MIN;
-          while piece.front().unwrap().iter().all(|&x| x == '.') {
-            piece.pop_front();
+          while piece_clone.front().unwrap().iter().all(|&x| x == '.') {
+            piece_clone.pop_front();
             negative_y += 1;
           }
-          while piece.iter().all(|row| row.front().unwrap() == &'.') {
-            for row in &mut piece {
+          while piece_clone.iter().all(|row| row.front().unwrap() == &'.') {
+            for row in &mut piece_clone {
               row.pop_front();
             }
             negative_x += 1;
@@ -275,21 +275,25 @@ impl Finder {
           the position is correct, otherwise it is not
           */
           let mut player_cells_hovered_by_piece:usize = 0;
+
+          let zip_y = (y as i128) - (negative_y as i128);//todo: wtf, crap, usize can not be negative, need refactoring
           
           /*iterate the piece and compare the cells with the field cells using the x and y incrementation*/
-          for (piece_y, field_y) in (0..piece.len()).zip(y..y + piece.len()) { /*vertical row step */
-            for (piece_x, field_x) in (0..piece[0].len()).zip(x..x+piece[0].len()) {/*column */
-              if piece[piece_y][piece_x] != '.' {/*if the piece cell is not empty*/
+          for (piece_y, field_y) in (0..piece_clone.len()).zip(y..y + piece_clone.len()) { /*vertical row step */
+            for (piece_x, field_x) in (0..piece_clone[0].len()).zip(x..x+piece_clone[0].len()) {/*column */
+              if piece_clone[piece_y][piece_x] != '.' {/*if the piece cell is not empty*/
                 if anfield[field_y][field_x] != '.' {/*if the field cell is not empty*/
                   /* both cells (anfield, piece) are not empty, so need extra check*/
                   
                   if player_cells_hovered_by_piece > 0{/*if at least one player cell is already hovered by piece*/
+                    self.reset_negative_xy();
                     return false;/*the piece position is not correct*/
                   }
                   
                   if anfield[field_y][field_x] == player[0] || anfield[field_y][field_x] == player[1] {/*if the field cell is player cell*/
                     player_cells_hovered_by_piece += 1;/*increment the player cells hovered by piece*/
                   } else {/*if the field cell is enemy cell*/
+                    self.reset_negative_xy();
                     return false;/*the piece position is not correct*/
                   }
                   
@@ -298,11 +302,16 @@ impl Finder {
             }
           }
           
-          if player_cells_hovered_by_piece == 0 {/*if(finally) no player cell is hovered by piece*/
+          if player_cells_hovered_by_piece != 1 {/*if(finally) no player cell is hovered by piece*/
+            self.reset_negative_xy();
             return false;/*the piece position is not correct*/
           }
           append_to_file(DEBUG_FILE, "the piece position is correct!!!\n\n").expect("cannot write to debug file");
           true /*the piece position is correct*/
+        }
+
+        pub fn reset_negative_xy(&mut self){
+          self.negative_xy = [usize::MIN, usize::MIN];
         }
         
       }
