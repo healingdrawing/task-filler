@@ -1,0 +1,9 @@
+# it is here, to keep folder structure unchanged, just for case. Or github can remove empty folder.
+
+# ignore executables for test and build, without docker. It is possible on linux, mac fails.
+
+# new one
+bunny
+
+# old one (original) , not used anymore
+filler

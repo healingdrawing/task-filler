@@ -15,4 +15,4 @@ Cargo.lock
 
 .DS_Store
 
-_temp/docker_image/debug.txt
+docker_image/debug.txt

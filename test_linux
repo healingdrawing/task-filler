@@ -1,6 +1,30 @@
 #!/bin/bash
-# rm _temp/docker_image/output.txt
 
-./do
+# Set the target directory for release builds, for copying the executable
+TARGET_DIR="docker_image/solution"
 
-./linux
+# Set the name for the executable, for copying the executable
+EXECUTABLE_NAME="bunny"
+
+# Build the project in release mode
+cargo build --release --manifest-path=filler/Cargo.toml
+
+# Copy the executable to the specified location with the desired name
+cp "filler/target/release/bunny" "$TARGET_DIR/$EXECUTABLE_NAME"
+
+# Print a message indicating successful build
+echo "Build completed. Executable is in $TARGET_DIR/$EXECUTABLE_NAME"
+
+cd docker_image/
+
+rm debug.txt
+
+./linux_game_engine -f maps/map01 -p2 linux_robots/bender -p1 solution/bunny
+
+# audit quesions q1 q2 q3
+
+# ./linux_game_engine -f maps/map00 -p2 solution/bunny -p1 linux_robots/wall_e # q1
+
+# ./linux_game_engine -f maps/map01 -p2 solution/bunny -p1 linux_robots/h2_d2 # q2
+
+# ./linux_game_engine -f maps/map02 -p2 solution/bunny -p1 linux_robots/bender # q3
