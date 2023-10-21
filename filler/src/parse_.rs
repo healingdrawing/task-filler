@@ -19,6 +19,7 @@ pub struct Parser {
   pub anfield: VecDeque<VecDeque<char>>,
   pub piece_size: [usize; 2],
   pub piece: VecDeque<VecDeque<char>>,
+  pub piece_negative_xy: [usize; 2],
 }
 
 impl Parser {
@@ -31,6 +32,7 @@ impl Parser {
       anfield: VecDeque::new(),
       piece_size: [0, 0],
       piece: VecDeque::new(),
+      piece_negative_xy: [0, 0],
     }
   }
 

@@ -1,4 +1,4 @@
-use crate::parse_::Parser;
+use crate::{parse_::Parser, debug::{append_to_file, DEBUG, DEBUG_FILE}};
 
 /** direction of the vector aimed to enemy */
 #[derive(Debug, Clone, Copy)]
@@ -12,6 +12,12 @@ pub enum Compas {
   W, // -x
   NW, // -x -y
   CENTRAL, // no direction
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum ForkDirection{
+  LEFT,
+  RIGHT,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -38,14 +44,18 @@ pub struct Finder {
    * if new piece distance not greater than previous than check the fork_right_strategy
    * it is a distance divided by the maximum distance of the field in the direction
    * */
-  pub global_max_distance_proportion_left_fork: f64,
+  pub global_max_distance_proportion_major_fork: f64,
   
   /**global max distance aimed to major_fork_right
    * used to check if the fork_right_strategy is still actual
    * if new piece distance not greater than previous than check the fork_left_strategy
    * it is a distance divided by the maximum distance of the field in the direction
    * */
-  pub global_max_distance_proportion_right_fork: f64,
+  pub global_max_distance_proportion_minor_fork: f64,
+
+  /**fork direction used to manage strategy*/
+  pub major_fork_direction: ForkDirection,
+  pub minor_fork_direction: ForkDirection,
   
   /**major direction to enemy in the beginning*/
   pub major: Compas,
@@ -60,22 +70,26 @@ pub struct Finder {
   /**minor direction, opposite to major */
   pub minor: Compas,
   /**for move answer*/
-  pub answer_xy: [usize; 2],
+  pub answer_xy: [i128; 2],
   /**for potential implementation of more compact placement(not agressive) */
   pub player_xy: [usize; 2],
   /**for first step*/
   pub first_answer: bool,
+  /** try to implement negative indices for the piece position on the anfield */
+  pub piece_negative_xy: [usize; 2],
 }
 
 impl Finder {
   pub fn new() -> Finder {
     Finder {
       fresh: true,
-      major_strategy: MajorStrategy::SPEAR,
+      major_strategy: MajorStrategy::FORK,
       global_min_distance_between_most_agressive_cells: f64::MAX,
       
-      global_max_distance_proportion_left_fork: f64::MIN,
-      global_max_distance_proportion_right_fork: f64::MIN,
+      global_max_distance_proportion_major_fork: f64::MIN,
+      global_max_distance_proportion_minor_fork: f64::MIN,
+      major_fork_direction: ForkDirection::LEFT,
+      minor_fork_direction: ForkDirection::RIGHT,
 
       major: Compas::CENTRAL,
       major_fork_left: Compas::CENTRAL,
@@ -83,9 +97,10 @@ impl Finder {
       major_left: Compas::CENTRAL,
       major_right: Compas::CENTRAL,
       minor: Compas::CENTRAL,
-      answer_xy: [usize::MIN, usize::MIN],
+      answer_xy: [i128::MIN, i128::MIN],
       player_xy: [usize::MIN, usize::MIN],
       first_answer: true,
+      piece_negative_xy: [usize::MIN, usize::MIN],
     }
   }
   
@@ -100,30 +115,51 @@ impl Finder {
     }
   }
   
-  pub fn find_answer(&mut self, parser: &mut Parser) -> [usize; 2] {
+  pub fn find_answer(&mut self, parser: &mut Parser) -> [i128; 2] {
     if self.fresh{
       self.fresh = false;
       // find the player position
       let player_xy = self.find_player(parser);
-      self.player_xy = player_xy;
+      self.player_xy = player_xy.clone();
       // if player not found then surrender
       if player_xy == [usize::MAX, usize::MAX] {
-        self.answer_xy = player_xy;
-        return player_xy;
+        self.answer_xy = [player_xy[0] as i128, player_xy[1] as i128];
+        return [player_xy [0] as i128, player_xy [1] as i128];
       }
       // find the enemy position(the most far enemy cell) and save coordinates as surrender answer
-      let enemy_xy = self.find_enemy(parser, player_xy);
+      let enemy_xy = self.find_enemy(parser, player_xy.clone());
       // todo: find the enemy direction N(-y) S(+y) W(-x) E(+x), x8 directions using enum,
-      self.major = self.find_direction(player_xy, enemy_xy);
-      self.major_fork_left = self.find_fork_left_direction(self.major);
-      self.major_fork_right = self.find_fork_right_direction(self.major);
-      self.major_left = self.find_left_direction(self.major);// artefact
-      self.major_right = self.find_right_direction(self.major);// artefact
+      self.major = self.find_direction(player_xy.clone(), enemy_xy.clone());
+      self.major_fork_left = self.find_fork_left_direction(self.major.clone());
+      self.major_fork_right = self.find_fork_right_direction(self.major.clone());
+      self.major_left = self.find_left_direction(self.major.clone());// artefact
+      self.major_right = self.find_right_direction(self.major.clone());// artefact
       
-      self.minor = self.find_opposite_direction(self.major);
+      self.minor = self.find_opposite_direction(self.major.clone());
+
+      
+
+      [self.major_fork_direction, self.minor_fork_direction]
+      = self.find_major_and_minor_fork_direction_from_xy(
+        self.major_left.clone(),
+        self.major_right.clone(),
+        self.player_xy.clone(),
+        &parser.anfield_size.clone(),
+      );
+
+      append_to_file(DEBUG_FILE, &format!("major {:?}", self.major)).expect("fail to write to file");
+      append_to_file(DEBUG_FILE, &format!("major left {:?}", self.major_left)).expect("fail to write to file");
+      append_to_file(DEBUG_FILE, &format!("major right {:?}", self.major_right)).expect("fail to write to file");
+      append_to_file(DEBUG_FILE, &format!("player_xy{:?}", self.player_xy)).expect("fail to write to file");
+      append_to_file(DEBUG_FILE, &format!("enemy_xy{:?}", enemy_xy)).expect("fail to write to file");
+      append_to_file(DEBUG_FILE, &format!("major fork direction{:?}", self.major_fork_direction)).expect("fail to write to file");
+      append_to_file(DEBUG_FILE, &format!("minor fork direction{:?}", self.minor_fork_direction)).expect("fail to write to file");
+
+
     }
+
     
-    self.answer_xy = self.find_position(parser); //todo: implement. it is raw
+    self.answer_xy = self.find_position(parser);
     
     //clean parser
     parser.reset();

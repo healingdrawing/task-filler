@@ -56,50 +56,11 @@ impl Finder {
 
   }
 
-  /** find the minimum distance from the any piece cell
-   * to the cell of the opposite_team_cell_xy
-   * no check for the character of the opposite_team_cell_xy
-   * be careful to use it
-   */
-  pub fn find_piece_cell_min_distance_to_cell_xy(
-    &mut self,
-    anfield: &VecDeque<VecDeque<char>>,
-    piece: &VecDeque<VecDeque<char>>,
-    piece_left_top_cell_xy:[usize;2],
-    opposite_team_cell_xy:[usize;2]
-  )-> f64 {
-    let mut distance = f64::MAX;
-    /*check the opposite_team_cell_xy is not empty cell */
-    if anfield[opposite_team_cell_xy[1]][opposite_team_cell_xy[0]] == '.' 
-    {
-      return distance
-    }
-
-
-    /*
-      iterate peice cells inside anfield with incrementation of x and y
-      and calculate the distances from the not empty cells '.'
-    */
-    for piece_y in 0..piece.len() {
-      for piece_x in 0..piece[0].len() {
-        if piece[piece_y][piece_x] != '.' {
-          let xy = [piece_left_top_cell_xy[0] + piece_x, piece_left_top_cell_xy[1] + piece_y];
-          let current_distance = self.find_distance(xy, opposite_team_cell_xy);
-          if current_distance < distance {
-            distance = current_distance;
-          }
-        }
-      }
-    }
-    distance
-    
-  }
-
   /**find the most agressive distance of piece cell on compas way */
-  pub fn find_most_agressive_distnace_of_piece_cell(
+  pub fn find_most_agressive_distance_of_piece_cell(
     &mut self,
     piece: &VecDeque<VecDeque<char>>,
-    piece_left_top_cell_xy:[usize;2],
+    piece_left_top_cell_xy:[i128;2],
     direction:Compas,
     anfield_size:&[usize;2],
   )-> f64 {
@@ -115,12 +76,12 @@ impl Finder {
       for (piece_x, piece_cell) in piece_row.iter().enumerate() {
         /* if the cell is not empty */
         if *piece_cell != '.' {
-          let x = piece_x+xy[0];
-          let y = piece_y+xy[1];
+          let x = piece_x as i128 +xy[0];
+          let y = piece_y as i128 +xy[1];
           /*from far point to piece cell */
           let piece_distance = self.find_distance(
             far_xy,
-            [x,y]
+            [x as usize, y as usize]
           );
           
           if piece_distance > distance {
@@ -134,27 +95,25 @@ impl Finder {
   }
 
   /**find the most agressive distance of piece cell on on compas way */
-  pub fn find_most_agressive_distnace_proportion_of_piece_cell(
+  pub fn find_most_agressive_distance_proportion_of_piece_cell(
     &mut self,
     piece: &VecDeque<VecDeque<char>>,
-    piece_left_top_cell_xy:[usize;2],
+    piece_left_top_cell_xy:[i128;2],
     direction:Compas,
     anfield_size:&[usize;2],
   )-> f64 {
 
-    let full_distance = match direction {
-      Compas::N | Compas::S => anfield_size[1] as f64,
-      Compas::W | Compas::E => anfield_size[0] as f64,
-      Compas::NW | Compas::SE | Compas::NE | Compas::SW => (
-        (
-          anfield_size[0] * anfield_size[0]
-          + anfield_size[1] * anfield_size[1]
-        ) as f64
-      ).sqrt(),
-      Compas::CENTRAL => f64::MAX,
-    };
+    let full_distance = self.find_full_distance_of_direction(
+      anfield_size,
+      direction
+    );
 
-    let mut distance = f64::MIN;
+    if full_distance == 0f64 {
+      println!("wtf? looks like anfield_size is zero or direction is central");
+      return 0f64;
+    }
+
+    let mut distance = 0f64;
     let xy = piece_left_top_cell_xy.clone();
     let far_xy = self.find_most_far_xy_opposite_the_direction(
       anfield_size,
@@ -166,12 +125,12 @@ impl Finder {
       for (piece_x, piece_cell) in piece_row.iter().enumerate() {
         /* if the cell is not empty */
         if *piece_cell != '.' {
-          let x = piece_x+xy[0];
-          let y = piece_y+xy[1];
+          let x = piece_x as i128 + xy[0];
+          let y = piece_y as i128 + xy[1];
           /*from far point to piece cell */
           let piece_distance = self.find_distance(
             far_xy.clone(),
-            [x,y].clone()
+            [x as usize, y as usize].clone()
           );
           
           if piece_distance > distance {
@@ -182,6 +141,74 @@ impl Finder {
     }
 
     distance / full_distance
+  }
+
+  /**find the most agressive distance of piece cell on on compas way */
+  pub fn find_less_agressive_distance_proportion_of_piece_cell(
+    &mut self,
+    piece: &VecDeque<VecDeque<char>>,
+    piece_left_top_cell_xy:[i128;2],
+    direction:Compas,
+    anfield_size:&[usize;2],
+  )-> f64 {
+
+    let full_distance = self.find_full_distance_of_direction(
+      anfield_size,
+      direction
+    );
+
+    if full_distance == 0f64 {
+      println!("wtf? looks like anfield_size is zero or direction is central");
+      return 0f64;
+    }
+
+    let mut distance = 0f64;
+    let xy = piece_left_top_cell_xy.clone();
+    let far_xy = self.find_most_far_xy_of_direction(
+      anfield_size,
+      direction
+    );
+
+    /* iterate each piece cell */
+    for (piece_y, piece_row) in piece.iter().enumerate() {
+      for (piece_x, piece_cell) in piece_row.iter().enumerate() {
+        /* if the cell is not empty */
+        if *piece_cell != '.' {
+          let x = piece_x as i128 + xy[0];
+          let y = piece_y as i128 + xy[1];
+          /*from far point to piece cell */
+          let piece_distance = self.find_distance(
+            far_xy.clone(),
+            [x as usize, y as usize].clone()
+          );
+          
+          if piece_distance < distance {
+            distance = piece_distance.clone();
+          }
+        }
+      }
+    }
+
+    distance / full_distance
+  }
+
+
+  fn find_full_distance_of_direction(
+    &mut self,
+    anfield_size:&[usize;2],
+    direction:Compas
+  )-> f64 {
+    match direction {
+      Compas::N | Compas::S => anfield_size[1] as f64,
+      Compas::W | Compas::E => anfield_size[0] as f64,
+      Compas::NW | Compas::SE | Compas::NE | Compas::SW => (
+        (
+          anfield_size[0] * anfield_size[0]
+          + anfield_size[1] * anfield_size[1]
+        ) as f64
+      ).sqrt(),
+      Compas::CENTRAL => 0f64,
+    }
   }
 
 }

@@ -18,7 +18,7 @@ impl Parser {
         self.piece_size = [size1, size2];
         
         // Print the array
-        append_to_file(DEBUG_FILE, &format!("{:?}",self.piece_size)).expect("Unable to write data");
+        // append_to_file(DEBUG_FILE, &format!("{:?}",self.piece_size)).expect("Unable to write data");
       } else {
         println!("Failed to parse sizes");
       }
@@ -35,14 +35,45 @@ impl Parser {
     self.piece.push_back(row);
     
     if self.piece.len() == self.piece_size[1] {
-      
-      // self.trim_empty_rows_and_columns();//todo: danger check this, not sure it is correct
+
+      // append_to_file(DEBUG_FILE, &format!("piece before trim\n{:?}",self.piece)).expect("Unable to write data");
+
+      self.trim_empty_rows_and_columns_from_the_end();//works, looks like not crushes
+      self.trim_empty_rows_and_columns_from_the_beginning_and_fill_negative_xy();//debug danger it craps the process
       
       self.state = ParserState::GOT_PIECE;
-      append_to_file(DEBUG_FILE, &format!("{:?}",self.piece)).expect("Unable to write data");
+      // append_to_file(DEBUG_FILE, &format!("piece after trim\n{:?}",self.piece)).expect("Unable to write data");
+      
     }
   }
   
-  
+  fn trim_empty_rows_and_columns_from_the_end(&mut self){
+    // cut empty rows from the end
+    while self.piece.back().unwrap().iter().all(|&x| x == '.') {
+      self.piece.pop_back();
+    }
+    // cut empty columns from the end
+    while self.piece.iter().all(|row| row.back().unwrap() == &'.') {
+      for row in &mut self.piece {
+        row.pop_back();
+      }
+    }
+  }
+
+  fn trim_empty_rows_and_columns_from_the_beginning_and_fill_negative_xy(&mut self){
+    self.piece_negative_xy = [0, 0];
+    // cut empty rows from the beginning
+    while self.piece.front().unwrap().iter().all(|&x| x == '.') {
+      self.piece.pop_front();
+      self.piece_negative_xy[1] += 1;
+    }
+    // cut empty columns from the beginning
+    while self.piece.iter().all(|row| row.front().unwrap() == &'.') {
+      for row in &mut self.piece {
+        row.pop_front();
+      }
+      self.piece_negative_xy[0] += 1;
+    }
+  }
   
 }
