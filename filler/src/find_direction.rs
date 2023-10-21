@@ -31,13 +31,13 @@ impl Finder {
 }
 
   /** major is longest distance to prefer to be managed first */
-  pub fn find_major_and_minor_fork_direction_from_xy(
+  pub fn find_major_and_minor_fork_directions_and_end_point_of_vectors_from_xy(
     &mut self,
     fork_left_direction:Compas,
     fork_right_direction:Compas,
     player_xy:[usize;2],
     anfield_size_xy:&[usize;2],
-  )-> [ForkDirection;2] {
+  )-> (ForkDirection, ForkDirection, [i128;2], [i128;2]) {
     
     let most_far_left_fork_xy = self.find_most_far_xy_of_direction(
       anfield_size_xy,
@@ -64,10 +64,14 @@ impl Finder {
     append_to_file(DEBUG_FILE, &format!("right fork distance{:?}", right_fork_distance)).expect("fail to write to file");
     append_to_file(DEBUG_FILE, &format!("left fork distance{:?}", left_fork_distance)).expect("fail to write to file");
 
+
+    let rxy = [most_far_right_fork_xy[0] as i128, most_far_right_fork_xy[1] as i128];
+    let lxy = [most_far_left_fork_xy[0] as i128, most_far_left_fork_xy[1] as i128];
+
     if right_fork_distance > left_fork_distance {
-      [ForkDirection::RIGHT, ForkDirection::LEFT]
+      (ForkDirection::RIGHT, ForkDirection::LEFT, rxy, lxy)
     } else {
-      [ForkDirection::LEFT, ForkDirection::RIGHT]
+      (ForkDirection::LEFT, ForkDirection::RIGHT, lxy, rxy)
     }
 
   }

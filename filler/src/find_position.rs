@@ -47,8 +47,9 @@ impl Finder {
     
     let piece_height = piece.len() as i128;
     let piece_width = piece[0].len() as i128;
+    let piece_diagonal = self.diagonal_of_the_piece_not_empty_cells_rectangle(piece);
     let piece_diagonal_proportion =
-    self.diagonal_of_the_piece_not_empty_cells_rectangle(piece)/self.diagonal_of_the_piece_not_empty_cells_rectangle(anfield);
+    piece_diagonal/self.diagonal_of_the_piece_not_empty_cells_rectangle(anfield);
     
     // append_to_file(DEBUG_FILE, &format!("\n\n===\ninside find_position piece_height {} piece_width {}", piece_height,piece_width)).expect("cannot write to debug file");
     
@@ -155,7 +156,7 @@ impl Finder {
               answer_xy_major_fork = [x, y].clone();
               answer_xy_minor_fork = [x, y].clone();
             }
-            
+
             /*from destination of the right fork up to closer cell of the piece */
             let min_distance_proportion_to_left_fork =
             self.find_less_agressive_distance_proportion_of_piece_cell(
@@ -197,21 +198,38 @@ impl Finder {
               ForkDirection::RIGHT => [max_distance_proportion_right_fork, max_distance_proportion_left_fork],
             };
             
-            if max_distance_proportion_major_fork + min_distance_proportion_to_major_fork
-            > buffer_global_max_distance_proportion_major_fork - piece_diagonal_proportion
+            let p = self.player_xy.clone();
+            let min_distance_to_major_vector = self.find_min_distance_from_piece_to_vector(
+              piece,
+              [x,y].clone(),
+              [p[0] as i128, p[1] as i128],
+              self.major_fork_vector_end_point.clone()
+            );
+            let min_distance_to_minor_vector = self.find_min_distance_from_piece_to_vector(
+              piece,
+              [x,y].clone(),
+              [p[0] as i128, p[1] as i128],
+              self.minor_fork_vector_end_point.clone()
+            );
+
+            let precision = 1f64;
+            if min_distance_to_major_vector <  precision
+            && max_distance_proportion_major_fork// + min_distance_proportion_to_major_fork
+            > buffer_global_max_distance_proportion_major_fork
             {
               buffer_global_max_distance_proportion_major_fork =
-              max_distance_proportion_major_fork.clone() + min_distance_proportion_to_major_fork.clone();
+              max_distance_proportion_major_fork.clone();
               fork_strategy_still_effective = true;
               major_fork_strategy_still_effective = true;
               answer_xy_major_fork = [x, y].clone();
             }
             
-            if max_distance_proportion_minor_fork  + min_distance_proportion_to_minor_fork
-            > buffer_global_max_distance_proportion_minor_fork - piece_diagonal_proportion
+            if min_distance_to_minor_vector <  precision
+            // && max_distance_proportion_minor_fork//  + min_distance_proportion_to_minor_fork
+            // > buffer_global_max_distance_proportion_minor_fork
             {
               buffer_global_max_distance_proportion_minor_fork =
-              max_distance_proportion_minor_fork.clone() + min_distance_proportion_to_minor_fork.clone();
+              max_distance_proportion_minor_fork.clone();
               fork_strategy_still_effective = true;
               minor_fork_strategy_still_effective = true;
               answer_xy_minor_fork = [x, y].clone();
@@ -249,7 +267,7 @@ impl Finder {
     // now try to find the peice which is the most closer/far(try both) to the enemy field, according to the middle arithmetical position of the enemy cells, and the middle arithmetical position of the piece cells
     
     // append_to_file(DEBUG_FILE, &format!("\n\n===\nAFTER FORK")).expect("cannot write to debug file");
-    if false { /*turn on the after FORK strategy */
+    if true { /*turn on the after FORK strategy */
       let enemy_cells_middle_xy = self.find_middle_arithmetical_xy_position_of_enemy_field(anfield, enemy_char);
       
       let mut first_step = true; // manage the first position of the piece, to use it as default answer
