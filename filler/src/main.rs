@@ -42,17 +42,23 @@ fn main() {
         match parser.state {
           ParserState::GOT_PIECE => {
             let rust_crap_answer = finder.find_answer(&mut parser);
-            // let crap_x = rust_crap_answer[0] as i128 - finder.piece_negative_xy[0] as i128;
-            // let crap_y = rust_crap_answer[1] as i128 - finder.piece_negative_xy[1] as i128;
-            thread::sleep(Duration::from_millis(50));
+            // thread::sleep(Duration::from_millis(2000));
 
-            println!("{} {}\n negative_x -{} negative_y -{}",
+            println!("{} {}",
               rust_crap_answer[0],
               rust_crap_answer[1],
-              finder.piece_negative_xy[0],
-              finder.piece_negative_xy[1],
             );
+
+            // todo: sometimes the engine recognize the second line as second response and fails the game. So not desirable to print the second line
+            // println!("{} {}\n negative_x -{} negative_y -{}",
+            //   rust_crap_answer[0],
+            //   rust_crap_answer[1],
+            //   finder.piece_negative_xy[0],
+            //   finder.piece_negative_xy[1],
+            // );
+            
             finder.reset_negative_xy();
+
             // println!("{}", finder.answer());
           },
           _ => (),

@@ -1,4 +1,4 @@
-use crate::parse_::Parser;
+use crate::{parse_::Parser, debug::{append_to_file, DEBUG, DEBUG_FILE}};
 
 /** direction of the vector aimed to enemy */
 #[derive(Debug, Clone, Copy)]
@@ -137,15 +137,27 @@ impl Finder {
       
       self.minor = self.find_opposite_direction(self.major.clone());
 
+      
+
       [self.major_fork_direction, self.minor_fork_direction]
       = self.find_major_and_minor_fork_direction_from_xy(
-        self.major_fork_left.clone(),
-        self.major_fork_right.clone(),
+        self.major_left.clone(),
+        self.major_right.clone(),
         self.player_xy.clone(),
         &parser.anfield_size.clone(),
-      )
+      );
+
+      append_to_file(DEBUG_FILE, &format!("major {:?}", self.major)).expect("fail to write to file");
+      append_to_file(DEBUG_FILE, &format!("major left {:?}", self.major_left)).expect("fail to write to file");
+      append_to_file(DEBUG_FILE, &format!("major right {:?}", self.major_right)).expect("fail to write to file");
+      append_to_file(DEBUG_FILE, &format!("player_xy{:?}", self.player_xy)).expect("fail to write to file");
+      append_to_file(DEBUG_FILE, &format!("enemy_xy{:?}", enemy_xy)).expect("fail to write to file");
+      append_to_file(DEBUG_FILE, &format!("major fork direction{:?}", self.major_fork_direction)).expect("fail to write to file");
+      append_to_file(DEBUG_FILE, &format!("minor fork direction{:?}", self.minor_fork_direction)).expect("fail to write to file");
+
 
     }
+
     
     self.answer_xy = self.find_position(parser);
     

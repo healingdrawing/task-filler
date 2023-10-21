@@ -47,8 +47,10 @@ impl Finder {
     
     let piece_height = piece.len() as i128;
     let piece_width = piece[0].len() as i128;
+    let piece_diagonal_proportion =
+    self.diagonal_of_the_piece_not_empty_cells_rectangle(piece)/self.diagonal_of_the_piece_not_empty_cells_rectangle(anfield);
     
-    append_to_file(DEBUG_FILE, &format!("\n\n===\ninside find_position piece_height {} piece_width {}", piece_height,piece_width)).expect("cannot write to debug file");
+    // append_to_file(DEBUG_FILE, &format!("\n\n===\ninside find_position piece_height {} piece_width {}", piece_height,piece_width)).expect("cannot write to debug file");
     
     /* prepare iterators depend on self.major direction */
     let y_iterator = match self.major {
@@ -123,9 +125,10 @@ impl Finder {
     }
     */
     
+    let mut fork_strategy_still_effective = false; /*false - no more ways to increase the progress to fork directions*/
+    
     if self.major_strategy == MajorStrategy::FORK {/*agressively invade to fork sides */
       
-      let mut fork_strategy_still_effective = false; /*false - no more ways to increase the progress to fork directions*/
       let mut major_fork_strategy_still_effective = false;
       let mut minor_fork_strategy_still_effective = false;
       
@@ -133,10 +136,10 @@ impl Finder {
       * after choose which one to use,
       * left or right fork
       */
-      let mut buffer_global_max_distance_major_fork =
+      let mut buffer_global_max_distance_proportion_major_fork =
       self.global_max_distance_proportion_major_fork.clone();
       
-      let mut buffer_global_max_distance_minor_fork =
+      let mut buffer_global_max_distance_proportion_minor_fork =
       self.global_max_distance_proportion_minor_fork.clone();
       
       let mut answer_xy_major_fork = answer_xy.clone();
@@ -153,16 +156,16 @@ impl Finder {
               answer_xy_minor_fork = [x, y].clone();
             }
             
-            let max_distance_left_fork =
-            self.find_most_agressive_distance_of_piece_cell(
+            let max_distance_proportion_left_fork =
+            self.find_most_agressive_distance_proportion_of_piece_cell(
               piece,
               [x,y].clone(),
               self.major_fork_left.clone(),
               &anfield_size_xy.clone()
             );
             
-            let max_distance_right_fork =
-            self.find_most_agressive_distance_of_piece_cell(
+            let max_distance_proportion_right_fork =
+            self.find_most_agressive_distance_proportion_of_piece_cell(
               piece,
               [x,y].clone(),
               self.major_fork_right.clone(),
@@ -170,19 +173,21 @@ impl Finder {
             );
             
             let [max_distance_major_fork, max_distance_minor_fork] = match self.major_fork_direction {
-              ForkDirection::LEFT => [max_distance_left_fork, max_distance_right_fork],
-              ForkDirection::RIGHT => [max_distance_right_fork, max_distance_left_fork],
+              ForkDirection::LEFT => [max_distance_proportion_left_fork, max_distance_proportion_right_fork],
+              ForkDirection::RIGHT => [max_distance_proportion_right_fork, max_distance_proportion_left_fork],
             };
             
-            if max_distance_major_fork > buffer_global_max_distance_major_fork{
-              buffer_global_max_distance_major_fork = max_distance_major_fork.clone();
+            if max_distance_major_fork > buffer_global_max_distance_proportion_major_fork - piece_diagonal_proportion
+            {
+              buffer_global_max_distance_proportion_major_fork = max_distance_major_fork.clone();
               fork_strategy_still_effective = true;
               major_fork_strategy_still_effective = true;
               answer_xy_major_fork = [x, y].clone();
             }
             
-            if max_distance_minor_fork > buffer_global_max_distance_minor_fork{
-              buffer_global_max_distance_minor_fork = max_distance_minor_fork.clone();
+            if max_distance_minor_fork > buffer_global_max_distance_proportion_minor_fork - piece_diagonal_proportion
+            {
+              buffer_global_max_distance_proportion_minor_fork = max_distance_minor_fork.clone();
               fork_strategy_still_effective = true;
               minor_fork_strategy_still_effective = true;
               answer_xy_minor_fork = [x, y].clone();
@@ -197,12 +202,13 @@ impl Finder {
         
         if major_fork_strategy_still_effective{
           
-          self.global_max_distance_proportion_major_fork = buffer_global_max_distance_major_fork.clone();
+          self.global_max_distance_proportion_major_fork = buffer_global_max_distance_proportion_major_fork.clone();
           return answer_xy_major_fork.clone();
           
-        } else if minor_fork_strategy_still_effective{
+        } 
+        if minor_fork_strategy_still_effective{
           
-          self.global_max_distance_proportion_minor_fork = buffer_global_max_distance_minor_fork.clone();
+          self.global_max_distance_proportion_minor_fork = buffer_global_max_distance_proportion_minor_fork.clone();
           return answer_xy_minor_fork.clone();
           
         }
@@ -218,45 +224,48 @@ impl Finder {
     
     // now try to find the peice which is the most closer/far(try both) to the enemy field, according to the middle arithmetical position of the enemy cells, and the middle arithmetical position of the piece cells
     
-    let enemy_cells_middle_xy = self.find_middle_arithmetical_xy_position_of_enemy_field(anfield, enemy_char);
-    
-    let mut first_step = true; // manage the first position of the piece, to use it as default answer
-    let mut distance = 0f64; // manage the distance from the piece to the enemy field
-    
-    for y in y_iterator.clone() {
-      for x in x_iterator.clone() {
-        if self.position_is_correct(anfield, piece, x, y, player_char){
-          
-          if fresh_calculation {/*use the first found correct position for the piece as default */
-            fresh_calculation = false;
-            answer_xy = [x, y].clone();
+    // append_to_file(DEBUG_FILE, &format!("\n\n===\nAFTER FORK")).expect("cannot write to debug file");
+    if false { /*turn on the after FORK strategy */
+      let enemy_cells_middle_xy = self.find_middle_arithmetical_xy_position_of_enemy_field(anfield, enemy_char);
+      
+      let mut first_step = true; // manage the first position of the piece, to use it as default answer
+      let mut distance = 0f64; // manage the distance from the piece to the enemy field
+      
+      for y in y_iterator.clone() {
+        for x in x_iterator.clone() {
+          if self.position_is_correct(anfield, piece, x, y, player_char){
+            
+            if fresh_calculation {/*use the first found correct position for the piece as default */
+              fresh_calculation = false;
+              answer_xy = [x, y].clone();
+            }
+            
+            let piece_cells_middle_xy = self.find_middle_arithmetical_xy_position_of_piece(
+              piece,
+              [x,y].clone()
+            );
+            
+            let distance_from_piece_to_enemy_cells_middle_xy =
+            self.find_distance(
+              piece_cells_middle_xy.clone(),
+              enemy_cells_middle_xy.clone()
+            );
+            
+            if first_step {
+              first_step = false;
+              distance = distance_from_piece_to_enemy_cells_middle_xy.clone();
+              answer_xy = [x, y].clone();
+            } else if distance_from_piece_to_enemy_cells_middle_xy < distance {
+              distance = distance_from_piece_to_enemy_cells_middle_xy.clone();
+              answer_xy = [x, y].clone();
+            }
+            
+            
           }
-          
-          let piece_cells_middle_xy = self.find_middle_arithmetical_xy_position_of_piece(
-            piece,
-            [x,y].clone()
-          );
-          
-          let distance_from_piece_to_enemy_cells_middle_xy =
-          self.find_distance(
-            piece_cells_middle_xy.clone(),
-            enemy_cells_middle_xy.clone()
-          );
-          
-          if first_step {
-            first_step = false;
-            distance = distance_from_piece_to_enemy_cells_middle_xy.clone();
-            answer_xy = [x, y].clone();
-          } else if distance_from_piece_to_enemy_cells_middle_xy < distance {
-            distance = distance_from_piece_to_enemy_cells_middle_xy.clone();
-            answer_xy = [x, y].clone();
-          }
-          
-          
         }
       }
+      
     }
-    
     
     append_to_file(DEBUG_FILE, &format!("\n====\nanswer_xy: {} {}", &answer_xy[0], &answer_xy[1])).expect("cannot write to debug file");
     answer_xy
@@ -270,14 +279,14 @@ impl Finder {
     x: i128, y: i128, player:&[char;2]
   ) -> bool {
     
-    append_to_file(DEBUG_FILE, &format!("\n\n===\ninside position is correct")).expect("cannot write to debug file");
-    // append_to_file(DEBUG_FILE, &format!("anfield {:?}" ,anfield)).expect("cannot write to debug file");
-    append_to_file(DEBUG_FILE, &format!("piece {:?}" ,piece)).expect("cannot write to debug file");
-    append_to_file(DEBUG_FILE, &format!("x {} y {}" ,x,y)).expect("cannot write to debug file");
-    append_to_file(DEBUG_FILE, &format!("neg_x {} neg_y {}" ,self.piece_negative_xy[0],self.piece_negative_xy[1])).expect("cannot write to debug file");
+    // append_to_file(DEBUG_FILE, &format!("\n\n===\ninside position is correct")).expect("cannot write to debug file");
+    // // append_to_file(DEBUG_FILE, &format!("anfield {:?}" ,anfield)).expect("cannot write to debug file");
+    // append_to_file(DEBUG_FILE, &format!("piece {:?}" ,piece)).expect("cannot write to debug file");
+    // append_to_file(DEBUG_FILE, &format!("x {} y {}" ,x,y)).expect("cannot write to debug file");
+    // append_to_file(DEBUG_FILE, &format!("neg_x {} neg_y {}" ,self.piece_negative_xy[0],self.piece_negative_xy[1])).expect("cannot write to debug file");
     
     
-    append_to_file(DEBUG_FILE, &format!("player {:?}" ,player)).expect("cannot write to debug file");
+    // append_to_file(DEBUG_FILE, &format!("player {:?}" ,player)).expect("cannot write to debug file");
     
     /*
     only one cell from the piece must be placed on the player cell, so
@@ -290,7 +299,7 @@ impl Finder {
     let zip_y = (y + self.piece_negative_xy[1] as i128) as usize;
     let zip_x = (x + self.piece_negative_xy[0] as i128) as usize;
     
-    append_to_file(DEBUG_FILE, &format!("zip_x {} zip_y {}" ,zip_x,zip_y)).expect("cannot write to debug file");
+    // append_to_file(DEBUG_FILE, &format!("zip_x {} zip_y {}" ,zip_x,zip_y)).expect("cannot write to debug file");
     
     /*iterate the piece and compare the cells with the field cells using the x and y incrementation*/
     for (piece_y, field_y) in (0..piece.len()).zip(zip_y..zip_y + piece.len()) { /*vertical row step */
@@ -317,7 +326,7 @@ impl Finder {
     if player_cells_hovered_by_piece == 0 {/*if(finally) no player cell is hovered by piece*/
       return false;/*the piece position is not correct*/
     }
-    append_to_file(DEBUG_FILE, "the piece position is correct!!!\n\n").expect("cannot write to debug file");
+    // append_to_file(DEBUG_FILE, "the piece position is correct!!!\n\n").expect("cannot write to debug file");
     true /*the piece position is correct*/
   }
   

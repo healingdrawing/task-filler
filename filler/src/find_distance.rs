@@ -120,7 +120,7 @@ impl Finder {
           /*from far point to piece cell */
           let piece_distance = self.find_distance(
             far_xy,
-            [x as usize,y as usize]
+            [x as usize, y as usize]
           );
           
           if piece_distance > distance {
@@ -137,7 +137,7 @@ impl Finder {
   pub fn find_most_agressive_distance_proportion_of_piece_cell(
     &mut self,
     piece: &VecDeque<VecDeque<char>>,
-    piece_left_top_cell_xy:[usize;2],
+    piece_left_top_cell_xy:[i128;2],
     direction:Compas,
     anfield_size:&[usize;2],
   )-> f64 {
@@ -154,7 +154,11 @@ impl Finder {
       Compas::CENTRAL => f64::MAX,
     };
 
-    let mut distance = f64::MIN;
+    if full_distance == 0f64 {
+      println!("wtf? looks like anfield_size is zero");
+    }
+
+    let mut distance = 0f64;
     let xy = piece_left_top_cell_xy.clone();
     let far_xy = self.find_most_far_xy_opposite_the_direction(
       anfield_size,
@@ -166,12 +170,12 @@ impl Finder {
       for (piece_x, piece_cell) in piece_row.iter().enumerate() {
         /* if the cell is not empty */
         if *piece_cell != '.' {
-          let x = piece_x+xy[0];
-          let y = piece_y+xy[1];
+          let x = piece_x as i128 + xy[0];
+          let y = piece_y as i128 + xy[1];
           /*from far point to piece cell */
           let piece_distance = self.find_distance(
             far_xy.clone(),
-            [x,y].clone()
+            [x as usize, y as usize].clone()
           );
           
           if piece_distance > distance {
