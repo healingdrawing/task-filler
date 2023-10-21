@@ -42,7 +42,7 @@ fn main() {
         match parser.state {
           ParserState::GOT_PIECE => {
             let rust_crap_answer = finder.find_answer(&mut parser);
-            // thread::sleep(Duration::from_millis(2000));
+            // thread::sleep(Duration::from_millis(50));
 
             println!("{} {}",
               rust_crap_answer[0],

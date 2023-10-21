@@ -56,6 +56,10 @@ pub struct Finder {
   /**fork direction used to manage strategy*/
   pub major_fork_direction: ForkDirection,
   pub minor_fork_direction: ForkDirection,
+
+  /**fork vectors*/
+  pub major_fork_vector_end_point: [i128; 2],
+  pub minor_fork_vector_end_point: [i128; 2],
   
   /**major direction to enemy in the beginning*/
   pub major: Compas,
@@ -90,6 +94,9 @@ impl Finder {
       global_max_distance_proportion_minor_fork: f64::MIN,
       major_fork_direction: ForkDirection::LEFT,
       minor_fork_direction: ForkDirection::RIGHT,
+
+      major_fork_vector_end_point: [0,0],
+      minor_fork_vector_end_point: [0,0],
 
       major: Compas::CENTRAL,
       major_fork_left: Compas::CENTRAL,
@@ -138,14 +145,19 @@ impl Finder {
       self.minor = self.find_opposite_direction(self.major.clone());
 
       
-
-      [self.major_fork_direction, self.minor_fork_direction]
-      = self.find_major_and_minor_fork_direction_from_xy(
-        self.major_left.clone(),
-        self.major_right.clone(),
+      (
+        self.major_fork_direction,
+        self.minor_fork_direction,
+        self.major_fork_vector_end_point,
+        self.minor_fork_vector_end_point,
+      )
+      = self.find_major_and_minor_fork_directions_and_end_point_of_vectors_from_xy(
+        self.major_fork_left.clone(),
+        self.major_fork_right.clone(),
         self.player_xy.clone(),
         &parser.anfield_size.clone(),
       );
+
 
       append_to_file(DEBUG_FILE, &format!("major {:?}", self.major)).expect("fail to write to file");
       append_to_file(DEBUG_FILE, &format!("major left {:?}", self.major_left)).expect("fail to write to file");
