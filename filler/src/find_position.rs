@@ -156,6 +156,14 @@ impl Finder {
               answer_xy_minor_fork = [x, y].clone();
             }
             
+            /*from destination of the right fork up to closer cell of the piece */
+            let min_distance_proportion_to_left_fork =
+            self.find_less_agressive_distance_proportion_of_piece_cell(
+              piece,
+              [x,y].clone(),
+              self.major_fork_right.clone(),
+              &anfield_size_xy.clone()
+            );
             let max_distance_proportion_left_fork =
             self.find_most_agressive_distance_proportion_of_piece_cell(
               piece,
@@ -164,6 +172,14 @@ impl Finder {
               &anfield_size_xy.clone()
             );
             
+            /*from destination of the left fork up to closer cell of the piece */
+            let min_distance_proportion_to_right_fork =
+            self.find_less_agressive_distance_proportion_of_piece_cell(
+              piece,
+              [x,y].clone(),
+              self.major_fork_left.clone(),
+              &anfield_size_xy.clone()
+            );
             let max_distance_proportion_right_fork =
             self.find_most_agressive_distance_proportion_of_piece_cell(
               piece,
@@ -172,22 +188,30 @@ impl Finder {
               &anfield_size_xy.clone()
             );
             
-            let [max_distance_major_fork, max_distance_minor_fork] = match self.major_fork_direction {
+            let [min_distance_proportion_to_major_fork, min_distance_proportion_to_minor_fork] = match self.major_fork_direction {
+              ForkDirection::LEFT => [min_distance_proportion_to_left_fork, min_distance_proportion_to_right_fork],
+              ForkDirection::RIGHT => [min_distance_proportion_to_right_fork, min_distance_proportion_to_left_fork],
+            };
+            let [max_distance_proportion_major_fork, max_distance_proportion_minor_fork] = match self.major_fork_direction {
               ForkDirection::LEFT => [max_distance_proportion_left_fork, max_distance_proportion_right_fork],
               ForkDirection::RIGHT => [max_distance_proportion_right_fork, max_distance_proportion_left_fork],
             };
             
-            if max_distance_major_fork > buffer_global_max_distance_proportion_major_fork - piece_diagonal_proportion
+            if max_distance_proportion_major_fork + min_distance_proportion_to_major_fork
+            > buffer_global_max_distance_proportion_major_fork - piece_diagonal_proportion
             {
-              buffer_global_max_distance_proportion_major_fork = max_distance_major_fork.clone();
+              buffer_global_max_distance_proportion_major_fork =
+              max_distance_proportion_major_fork.clone() + min_distance_proportion_to_major_fork.clone();
               fork_strategy_still_effective = true;
               major_fork_strategy_still_effective = true;
               answer_xy_major_fork = [x, y].clone();
             }
             
-            if max_distance_minor_fork > buffer_global_max_distance_proportion_minor_fork - piece_diagonal_proportion
+            if max_distance_proportion_minor_fork  + min_distance_proportion_to_minor_fork
+            > buffer_global_max_distance_proportion_minor_fork - piece_diagonal_proportion
             {
-              buffer_global_max_distance_proportion_minor_fork = max_distance_minor_fork.clone();
+              buffer_global_max_distance_proportion_minor_fork =
+              max_distance_proportion_minor_fork.clone() + min_distance_proportion_to_minor_fork.clone();
               fork_strategy_still_effective = true;
               minor_fork_strategy_still_effective = true;
               answer_xy_minor_fork = [x, y].clone();
