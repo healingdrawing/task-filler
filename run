@@ -1,0 +1,7 @@
+#!/bin/bash
+
+# try to remove the container if it exists. If it doesn't, the process will be continued
+docker rm -f carrot
+
+# try to create the container "carrot" from the image "filler", run it interactively "-i" with terminal "-t"
+docker run --name carrot -it filler
