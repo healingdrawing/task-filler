@@ -17,8 +17,8 @@ grit:lab Åland Islands 2023
 - terminal: `./run` [ Enter ]  
 
 ... inside interactive terminal of docker container named `filler` ,  
-which will be opened automatically, execute the commands follow the audit instructions  
-**and do not forget to change the commands** according the operation system recommendations.  
+which will be opened automatically, execute the commands follow the audit instructions,  
+and `do not forget to change the commands` according the operation system recommendations.  
 Because 01-edu, of course, did not fix any descriptions, after the content was changed by them.
 
 To close container:
