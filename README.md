@@ -11,7 +11,8 @@ grit:lab Åland Islands 2023
 - open terminal inside folder `task-filler`
 - terminal `./test_linux` [ Enter ]
 
-## Run using docker, as task requires
+## Run using `Docker` (must be installed in advance), as task requires
+- run `Docker` software on your system(usually it starts `Docker daemon` automatically)  
 - open terminal inside folder `task-filler`
 - terminal: `./do` [ Enter ]  
 - terminal: `./run` [ Enter ]  
@@ -22,7 +23,7 @@ and `do not forget to change the commands` according the operation system recomm
 Because 01-edu, of course, did not fix any descriptions, after the content was changed by them.
 
 To close container:
-- terminal: `exit` [ Enter ] ... or press `Ctrl+D` (on linux)
+- terminal: `exit` [ Enter ] ... or press `Ctrl+D`  
 
 To see some examples of the commands, for linux, see `test_linux` file.
 
